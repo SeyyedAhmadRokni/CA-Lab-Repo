@@ -3,7 +3,7 @@ always @(posedge clk) begin
     if(freeze)
         out <= out;
     if (rst)
-        out <= 0'b32;
+        out <= 32'b0;
     else
         out <= in;
 end
