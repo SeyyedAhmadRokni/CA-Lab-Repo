@@ -1,8 +1,10 @@
-module PC(input clk,reset,input [31:0] PCnext,output reg [31:0] PCout);
-always @(posedge clk, posedge reset) begin
-    if (reset)
-        PCout <= 0;
-     else
-        PCout <= PCnext;
+module PC(input clk , rst , freeze , input [31:0] in ,output reg [31:0] out);
+always @(posedge clk) begin
+    if(freeze)
+        out <= out;
+    if (rst)
+        out <= 0'b32;
+    else
+        out <= in;
 end
 endmodule
