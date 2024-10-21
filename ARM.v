@@ -302,6 +302,80 @@ input          TD_CLK27;            //	TV Decoder 27MHz CLK
 inout	[35:0]	GPIO_0;					//	GPIO Connection 0
 inout	[35:0]	GPIO_1;					//	GPIO Connection 1
 
+assign rst = SW[0];
+wire [31:0] IF_PC, IF_Instruction;
+IF_Stage if_stage(
+    .clk(clk), .rst(rst), .freeze(SW[1]), .Branch_taken(1'b0),
+    .BranchAddr(32'b0),
+    .PC(IF_PC), .Instruction(IF_Instruction)
+);
 
-	
+
+wire [31:0] IF_PC_reg_out;
+reg [31:0] IF_Instruction_reg_out;
+IF_Stage_Reg if_stage_reg(
+    .clk(clk), .rst(rst), .freeze(1'b0), .flush(1'b0),
+    .PC_in(IF_PC), .Instruction_in(IF_Instruction),
+    .PC(IF_Instruction_reg_out), .Instruction(IF_Instruction_reg_out)
+);
+
+wire [31:0] ID_PC;	
+ID_Stage id_stage(
+    .clk(clk), .rst(rst),
+    .PC_in(IF_Instruction_reg_out), .PC(ID_PC)
+);
+
+
+wire [31:0] ID_PC_reg_out;
+reg [31:0] ID_Instruction_reg_out;
+ID_Stage_Reg id_stage_reg(
+    .clk(clk), .rst(rst), .freeze(1'b0), .flush(1'b0),
+    .PC_in(ID_PC), .Instruction_in(ID_Instruction),
+    .PC(ID_Instruction_reg_out), .Instruction(ID_Instruction_reg_out)
+);
+
+wire [31:0] EXE_PC;	
+EXE_Stage exe_stage(
+    .clk(clk), .rst(rst),
+    .PC_in(ID_Instruction_reg_out), .PC(EXE_PC)
+);
+
+
+wire [31:0] EXE_PC_reg_out;
+reg [31:0] EXE_Instruction_reg_out;
+EXE_Stage_Reg exe_stage_reg(
+    .clk(clk), .rst(rst), .freeze(1'b0), .flush(1'b0),
+    .PC_in(EXE_PC), .Instruction_in(EXE_Instruction),
+    .PC(EXE_Instruction_reg_out), .Instruction(EXE_Instruction_reg_out)
+);
+
+wire [31:0] MEM_PC;	
+MEM_Stage mem_stage(
+    .clk(clk), .rst(rst),
+    .PC_in(EXE_Instruction_reg_out), .PC(MEM_PC)
+);
+
+
+wire [31:0] MEM_PC_reg_o;
+reg [31:0]MEM_Instruction_reg_out;
+MEM_Stage_Reg mem_stage_reg(
+    .clk(clk), .rst(rst), .freeze(1'b0), .flush(1'b0),
+    .PC_in(MEM_PC), .Instruction_in(MEM_Instruction),
+    .PC(MEM_Instruction_reg_out), .Instruction(MEM_Instruction_reg_out)
+);
+
+wire [31:0] WB_PC;	
+WB_Stage wb_stage(
+    .clk(clk), .rst(rst),
+    .PC_in(MEM_Instruction_reg_out), .PC(WB_PC)
+);
+
+
+wire [31:0] WB_PC_reg_out;
+reg [31:0] WB_Instruction_reg_out;
+WB_Stage_Reg wb_stage_reg(
+    .clk(clk), .rst(rst), .freeze(1'b0), .flush(1'b0),
+    .PC_in(WB_PC), .Instruction_in(WB_Instruction),
+    .PC(WB_Instruction_reg_out), .Instruction(WB_Instruction_reg_out)
+);
 endmodule
