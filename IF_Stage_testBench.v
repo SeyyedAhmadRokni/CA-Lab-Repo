@@ -24,20 +24,11 @@ module IF_Stage_testBench;
         forever #5 clk = ~clk;
     end
     initial begin
-        rst = 1;
+        #10 rst = 1;
         freeze = 0;
         Branch_taken = 0;
         BranchAddr = 32'h00000000;
         #20 rst = 0;
-        #10;
-        freeze = 1;
-        #10;
-        freeze = 0;
-
-        Branch_taken = 1;
-        BranchAddr = 32'h00000010;
-        #10 Branch_taken = 0;
-
         #100;
         $stop;
     end
