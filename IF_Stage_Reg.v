@@ -5,7 +5,7 @@ module IF_Stage_Reg(
 );
     always@(posedge clk,posedge rst) begin
         if (rst == 1'b1)
-            PC = 32'b0;
+            PC <= 32'b0;
         else
             PC <= PC_in;
             Instruction <= Instruction_in;
