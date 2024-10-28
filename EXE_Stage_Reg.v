@@ -1,8 +1,8 @@
 module EXE_Stage_Reg
 (
-    input clk, rst,
-    input [31:0] PC_in,
-    output reg [31:0] PC
+    input clk/* synthesis keep */, rst/* synthesis keep */,
+    input [31:0] PC_in/* synthesis keep */,
+    output reg [31:0] PC/* synthesis keep */
 );
     always@(posedge clk,posedge  rst) begin
         if (rst == 1'b1)

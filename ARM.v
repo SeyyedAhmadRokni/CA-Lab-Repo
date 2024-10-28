@@ -304,7 +304,7 @@ inout	[35:0]	GPIO_1;					//	GPIO Connection 1
 
 wire rst;
 assign rst = SW[0];
-wire [31:0] IF_PC, IF_Instruction;
+wire [31:0] IF_PC, IF_Instruction/* synthesis preserve */;
 IF_Stage if_stage(
     .clk(CLOCK_50), .rst(rst), .freeze(SW[1]), .Branch_taken(1'b0),
     .BranchAddr(32'b0),
@@ -332,7 +332,7 @@ reg [31:0] ID_Instruction_reg_out;
 ID_Stage_Reg id_stage_reg(
     .clk(CLOCK_50), .rst(rst),
     .PC_in(ID_PC),
-    .PC(ID_PC_reg_out),
+    .PC(ID_PC_reg_out)
 );
 
 wire [31:0] EXE_PC;	
@@ -377,6 +377,6 @@ reg [31:0] WB_Instruction_reg_out;
 WB_Stage_Reg wb_stage_reg(
     .clk(CLOCK_50), .rst(rst),
     .PC_in(WB_PC),
-    .PC(WB_PC_reg_out),
+    .PC(WB_PC_reg_out)
 );
 endmodule

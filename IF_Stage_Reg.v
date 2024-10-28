@@ -1,7 +1,7 @@
 module IF_Stage_Reg(
-    input clk, rst, freeze, flush,
-    input [31:0] PC_in, Instruction_in,
-    output reg [31:0] PC, Instruction
+    input clk/* synthesis keep */, rst/* synthesis keep */, freeze/* synthesis keep */, flush/* synthesis keep */,
+    input [31:0] PC_in, Instruction_in/* synthesis keep */,
+    output reg [31:0] PC, Instruction/* synthesis keep */
 );
     always@(posedge clk,posedge rst) begin
         if (rst == 1'b1)

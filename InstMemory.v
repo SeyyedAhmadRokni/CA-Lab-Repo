@@ -1,4 +1,4 @@
-module InstMemory(input rst, input [31:0] adr, output reg [31:0] inst);
+module InstMemory(input rst/* synthesis keep */, input [31:0] adr/* synthesis keep */, output reg [31:0] inst/* synthesis keep */);
     reg [31:0] im [4095:0];
     always @(posedge rst)
     begin
