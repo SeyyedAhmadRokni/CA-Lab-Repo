@@ -4,7 +4,7 @@ module EXE_Stage_Reg
     input [31:0] PC_in,
     output reg [31:0] PC
 );
-    always@(posedge clk, rst) begin
+    always@(posedge clk,posedge  rst) begin
         if (rst == 1'b1)
             PC = 32'b0;
         else
