@@ -5,8 +5,9 @@ module MEM_Stage_Reg
     output reg [31:0] PC/* synthesis keep */
 );
     always@(posedge clk,posedge rst) begin
-        if (rst == 1'b1)
-            PC = 32'b0;
+        if (rst)
+            PC <= 32'b0;
+        
         else
             PC <= PC_in;
     end

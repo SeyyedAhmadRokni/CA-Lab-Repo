@@ -4,8 +4,10 @@ module IF_Stage_Reg(
     output reg [31:0] PC, Instruction/* synthesis keep */
 );
     always@(posedge clk,posedge rst) begin
-        if (rst == 1'b1)
-            PC = 32'b0;
+        if (rst) begin
+            PC <= 32'b0;
+            Instruction <= 32'b0;
+        end
         else
             PC <= PC_in;
             Instruction <= Instruction_in;
