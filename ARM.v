@@ -304,6 +304,7 @@ inout	[35:0]	GPIO_0;					//	GPIO Connection 0
 inout	[35:0]	GPIO_1;					//	GPIO Connection 1
 output [31:0] Test_wire_2;
 
+wire [31:0] WB_PC_reg_out;
 //assign Test_wire = {IF_Instruction[23:16], IF_Instruction[23:16], IF_Instruction[23:16], IF_Instruction[23:16]};
 wire rst;
 assign rst = SW[0];
@@ -376,7 +377,6 @@ WB_Stage wb_stage(
 );
 
 
-wire [31:0] WB_PC_reg_out;
 reg [31:0] WB_Instruction_reg_out;
 WB_Stage_Reg wb_stage_reg(
     .clk(CLOCK_50), .rst(rst),
