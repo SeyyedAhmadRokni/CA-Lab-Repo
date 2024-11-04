@@ -173,7 +173,6 @@ module ARM
 		////////////////////	GPIO	////////////////////////////
 		GPIO_0,							//	GPIO Connection 0
 		GPIO_1,							//	GPIO Connection 1
-		Test_wire,
 		Test_wire_2
 	);
 
@@ -303,7 +302,6 @@ input          TD_CLK27;            //	TV Decoder 27MHz CLK
 ////////////////////////	GPIO	////////////////////////////////
 inout	[35:0]	GPIO_0;					//	GPIO Connection 0
 inout	[35:0]	GPIO_1;					//	GPIO Connection 1
-output [31:0] Test_wire;
 output [31:0] Test_wire_2;
 
 //assign Test_wire = {IF_Instruction[23:16], IF_Instruction[23:16], IF_Instruction[23:16], IF_Instruction[23:16]};
