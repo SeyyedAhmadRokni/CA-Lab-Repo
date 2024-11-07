@@ -173,7 +173,8 @@ module ARM
 		////////////////////	GPIO	////////////////////////////
 		GPIO_0,							//	GPIO Connection 0
 		GPIO_1,							//	GPIO Connection 1
-		// Test_wire_2
+		// Test_wire_1,
+		Test_wire_2
 	);
 
 ////////////////////////	Clock Input	 	////////////////////////
@@ -302,23 +303,26 @@ input          TD_CLK27;            //	TV Decoder 27MHz CLK
 ////////////////////////	GPIO	////////////////////////////////
 inout	[35:0]	GPIO_0;					//	GPIO Connection 0
 inout	[35:0]	GPIO_1;					//	GPIO Connection 1
-// output [31:0] Test_wire_2;
+// output [31:0] Test_wire_1;
+output [31:0] Test_wire_2;
 
-wire [31:0] WB_PC_reg_out;
+wire [31:0] WB_PC;
 //assign Test_wire = {IF_Instruction[23:16], IF_Instruction[23:16], IF_Instruction[23:16], IF_Instruction[23:16]};
 wire rst;
 assign rst = SW[0];
-wire [31:0] IF_PC, IF_Instruction/* keep synthesis */;
+wire [31:0] IF_PC, IF_Instruction;
 IF_Stage if_stage(
     .clk(CLOCK_50), .rst(rst), .freeze(SW[1]), .Branch_taken(1'b0),
     .BranchAddr(32'b0),
     .PC(IF_PC), .Instruction(IF_Instruction)
 );
 
-// assign Test_wire_2 = WB_PC_reg_out;
 
-wire [31:0] IF_PC_reg_out /* keep synthesis */;
-wire [31:0] IF_Instruction_reg_out /* keep synthesis */;
+// assign Test_wire_1 = IF_Instruction;
+assign Test_wire_2 = WB_PC;
+
+wire [31:0] IF_PC_reg_out;
+wire [31:0] IF_Instruction_reg_out;
 IF_Stage_Reg if_stage_reg(
     .clk(CLOCK_50), .rst(rst), .freeze(1'b0), .flush(1'b0),
     .PC_in(IF_PC), .Instruction_in(IF_Instruction),
@@ -340,7 +344,6 @@ ID_Stage id_stage(
 
 
 wire [31:0] ID_PC_reg_out;
-reg [31:0] ID_Instruction_reg_out;
 ID_Stage_Reg id_stage_reg(
     .clk(CLOCK_50), .rst(rst),
     .PC_in(ID_PC),
@@ -354,8 +357,7 @@ EXE_Stage exe_stage(
 );
 
 
-wire [31:0] EXE_PC_reg_out /* keep synthesis */;
-reg [31:0] EXE_Instruction_reg_out /* keep synthesis */;
+wire [31:0] EXE_PC_reg_out;
 EXE_Stage_Reg exe_stage_reg(
     .clk(CLOCK_50), .rst(rst),
     .PC_in(EXE_PC),
@@ -370,24 +372,16 @@ MEM_Stage mem_stage(
 
 
 wire [31:0] MEM_PC_reg_o;
-reg [31:0]MEM_Instruction_reg_out;
 MEM_Stage_Reg mem_stage_reg(
     .clk(CLOCK_50), .rst(rst),
     .PC_in(MEM_PC),
     .PC(MEM_PC_reg_o)
 );
 
-wire [31:0] WB_PC;	
 WB_Stage wb_stage(
     .clk(CLOCK_50), .rst(rst),
     .PC_in(MEM_PC_reg_o), .PC(WB_PC)
 );
 
 
-reg [31:0] WB_Instruction_reg_out;
-WB_Stage_Reg wb_stage_reg(
-    .clk(CLOCK_50), .rst(rst),
-    .PC_in(WB_PC),
-    .PC(WB_PC_reg_out)
-);
 endmodule
