@@ -172,7 +172,8 @@ module ARM
 		TD_CLK27,                  //	TV Decoder 27MHz CLK
 		////////////////////	GPIO	////////////////////////////
 		GPIO_0,							//	GPIO Connection 0
-		GPIO_1							//	GPIO Connection 1
+		GPIO_1,							//	GPIO Connection 1
+		// Test_wire_2
 	);
 
 ////////////////////////	Clock Input	 	////////////////////////

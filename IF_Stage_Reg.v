@@ -8,9 +8,10 @@ module IF_Stage_Reg(
             PC <= 32'b0;
             Instruction <= 32'b0;
         end
-        else
+        else begin
             PC <= PC_in;
             Instruction <= Instruction_in;
+        end
     end
 
 endmodule

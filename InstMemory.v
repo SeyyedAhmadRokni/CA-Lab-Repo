@@ -6,6 +6,6 @@ module InstMemory(input rst/* synthesis keep */, input [31:0] adr/* synthesis ke
     end
     always @(adr)
     begin
-        inst = im[adr>>2];
+        inst <= im[adr>>2];
     end
 endmodule
