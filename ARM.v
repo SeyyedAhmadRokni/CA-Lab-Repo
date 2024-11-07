@@ -173,7 +173,7 @@ module ARM
 		////////////////////	GPIO	////////////////////////////
 		GPIO_0,							//	GPIO Connection 0
 		GPIO_1,							//	GPIO Connection 1
-		Test_wire_2
+		// Test_wire_2
 	);
 
 ////////////////////////	Clock Input	 	////////////////////////
@@ -302,7 +302,7 @@ input          TD_CLK27;            //	TV Decoder 27MHz CLK
 ////////////////////////	GPIO	////////////////////////////////
 inout	[35:0]	GPIO_0;					//	GPIO Connection 0
 inout	[35:0]	GPIO_1;					//	GPIO Connection 1
-output [31:0] Test_wire_2;
+// output [31:0] Test_wire_2;
 
 wire [31:0] WB_PC_reg_out;
 //assign Test_wire = {IF_Instruction[23:16], IF_Instruction[23:16], IF_Instruction[23:16], IF_Instruction[23:16]};
@@ -315,7 +315,7 @@ IF_Stage if_stage(
     .PC(IF_PC), .Instruction(IF_Instruction)
 );
 
-assign Test_wire_2 = WB_PC_reg_out;
+// assign Test_wire_2 = WB_PC_reg_out;
 
 wire [31:0] IF_PC_reg_out /* keep synthesis */;
 wire [31:0] IF_Instruction_reg_out /* keep synthesis */;
@@ -327,9 +327,16 @@ IF_Stage_Reg if_stage_reg(
 
 wire [31:0] ID_PC;	
 ID_Stage id_stage(
-    .clk(CLOCK_50), .rst(rst),
-    .PC_in(IF_PC_reg_out), .PC(ID_PC)
+	.clk(CLOCK_50), .rst(rst), .PC_in(IF_PC_reg_out),
+	.PC(ID_PC)
 );
+// ID_Stage id_stage(.clk(clk), .rst(rst), .MEM_W_ENIn(MEM_W_ENIn), .WB_ENIn(WB_ENIn), .HazardIn(HazardIn),
+// 	.WB_DestIn(WB_DestIn),
+// 	.PCIn(PCIn), .instructionIn(instructionIn), .WB_ValueIn(WB_ValueIn),
+// 	.PCOut(PCOut), .val_RnOut(val_RnOut), .val_RmOut(val_RmOut),
+// 	.Two_srcOut(Two_srcOut), .statusIn(statusIn), .SOut(SOut), .BOut(BOut), .MEM_W_ENOut(MEM_W_ENOut), .MEM_R_ENOut(MEM_R_ENOut), .WB_ENOut(WB_ENOut), .iOut(iOut),
+// 	.EXE_CMDOut(EXE_CMDOut), .DestOut(DestOut), .RnOut(RnOut), .regFileInp2Out(regFileInp2Out),
+// 	.shiftOperandOut(shiftOperandOut), .immOut(immOut));
 
 
 wire [31:0] ID_PC_reg_out;
