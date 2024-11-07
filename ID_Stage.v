@@ -87,11 +87,11 @@ module ID_Stage(clk, rst, instructionIn, WB_ENIn, WB_DestIn, WB_ValueIn,
     wire [0:0] notBranch;
     assign notBranch = ~controlUnitOut[5];
 
-    RegisterFile registerFile(
-        .clk(clk), .rst(rst), .regWrite(WB_ENIn), .regRead(notBranch),
-        .readRegister1(rn), .readRegister2(regInp2),
-        .writeRegister(WB_DestIn), .writeData(WB_ValueIn),
-        .readData1(Val_RnOut), .readData2(Val_RmOut)
+        RegisterFile registerFile(
+        .clk(clk), .rst(rst), .src1(rn), .src2(regInp2),
+        .Dest_wb(WB_DestIn), .Input_WB(WB_ValueIn),
+        .writeBackEn(WB_ENIn),
+        .reg1(Val_RnOut), .reg2(Val_RmOut)
     );
 
     assign TwoSrcOut = ~i | controlUnitOut[6];

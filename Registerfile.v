@@ -1,11 +1,11 @@
 module RegisterFile(
     input clk, rst,
     input [3:0] src1, src2, Dest_wb,
-    input [31:0] Result_WB,
+    input [31:0] Input_WB,
     input writeBackEn,
     output [31:0] reg1, reg2
 );
-    reg [31:0] regmem [3:0];
+    reg [31:0] regmem [15:0];
 
     integer i;
     assign reg1 = regmem[src1];
@@ -18,6 +18,6 @@ module RegisterFile(
             regmem[0] = 32'b0;
         end
         else
-            regmem [Dest_wb] = Result_WB;
+            regmem [Dest_wb] = Input_WB;
     end
 endmodule
