@@ -3,5 +3,5 @@ module adder #( parameter size = 32) (
     output [size-1:0] sum,
     output carry
 );
-    assign {carry, c} = a+b;
+    assign {carry, sum} = a+b;
 endmodule

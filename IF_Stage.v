@@ -13,7 +13,7 @@ module IF_Stage(
     InstMemory instMem(rst, pc_out, instMem_out);
     PC pc(clk, rst, freeze, mux_out, pc_out);
     
-    assign PC = pc_out_1;
-    assign Instruction = instMem_out_1;
+    assign PC = adder_out;
+    assign Instruction = instMem_out;
 
 endmodule
