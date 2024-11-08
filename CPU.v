@@ -49,6 +49,26 @@ module CPU(clk, rst, forwardENIn,
 	output wire[0:0]  SC_SRAM_UB_N, SC_SRAM_LB_N, SC_SRAM_WE_N, SC_SRAM_CE_N, SC_SRAM_OE_N;
 	output wire[31:0] SC_READ_DATA;	
 
+	wire [31:0] IF_PC, IF_Instruction, IF_BranchAddr;
+	wire IF_freeze, IF_Branch_taken, IF_flush;
+
+	assign IF_freeze = 1'b0;
+	assign IF_Branch_taken = 1'b0;
+	assign IF_BranchAddr = 32'b0;
+
+	IF_Stage if_stage(
+		.clk(clk), .rst(rst), .freeze(IF_freeze), .Branch_taken(IF_Branch_taken),
+		.BranchAddr(IF_BranchAddr),
+		.PC(IF_PC), .Instruction(IF_Instruction)
+	);
+
+	IF_Stage_Reg if_stage_reg(
+		.clk(clk), .rst(rst), .freeze(IF_freeze), .flush(IF_flush),
+		.PC_in(IF_IFR_PC), .Instruction_in(IF_IFR_Instruction),
+		.PC(IFR_ID_PC), .Instruction(IFR_ID_Instruction)
+	);
+
+
 
 	ID_Stage instDecode(
 		.clk(clk),                             .rst(rst),                  
@@ -86,5 +106,39 @@ module CPU(clk, rst, forwardENIn,
 		.src1In(ID_IDR_src1),   		      .src1Out(IDR_EX_src1),
 		.src2In(ID_IDR_src2),   		      .src2Out(IDR_EX_src2)
 	);
+
+	wire [31:0] EXE_PC;	
+	EXE_Stage exe_stage(
+		.clk(clk), .rst(rst),
+		.PC_in(IDR_EX_PC), .PC(EXE_PC)
+	);
+
+
+	wire [31:0] EXE_PC_reg_out;
+	EXE_Stage_Reg exe_stage_reg(
+		.clk(clk), .rst(rst),
+		.PC_in(EXE_PC),
+		.PC(EXE_PC_reg_out)
+	);
+
+	wire [31:0] MEM_PC;	
+	MEM_Stage mem_stage(
+		.clk(clk), .rst(rst),
+		.PC_in(EXE_PC_reg_out), .PC(MEM_PC)
+	);
+
+
+	wire [31:0] MEM_PC_reg_o;
+	MEM_Stage_Reg mem_stage_reg(
+		.clk(clk), .rst(rst),
+		.PC_in(MEM_PC),
+		.PC(MEM_PC_reg_o)
+	);
+
+	WB_Stage wb_stage(
+		.clk(clk), .rst(rst),
+		.PC_in(MEM_PC_reg_o), .PC(WB_PC)
+	);
+
 
 endmodule
