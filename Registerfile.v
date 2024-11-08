@@ -1,35 +1,23 @@
-module RegisterFile(clk, rst, regWrite, regRead,
-                    readRegister1, readRegister2,
-                    writeRegister, writeData,
-                    readData1, readData2);
-                    
-    parameter WORD_LEN = 32;
-    parameter WORD_COUNT = 16;
-
-    input clk, rst, regWrite, regRead;
-    input [3:0] readRegister1, readRegister2, writeRegister;
-    input [WORD_LEN-1:0] writeData;
-    
-    output [WORD_LEN-1:0] readData1, readData2;
-
-    reg [WORD_LEN-1:0] registerFile [0:WORD_COUNT-1];
+module RegisterFile(
+    input clk, rst,
+    input [3:0] src1, src2, Dest_wb,
+    input [31:0] Result_WB,
+    input writeBackEn,
+    output [31:0] reg1, reg2
+);
+    reg [31:0] regmem [3:0];
 
     integer i;
-
-    initial begin
-        for (i = 0; i < WORD_COUNT; i = i + 1)
-            registerFile[i] <= i;
+    assign reg1 = regmem[src1];
+    assign reg2 = regmem[src2];
+    always @(negedge clk, posedge rst) begin
+        if (rst)begin
+            for (i = 0; i < 16; i = i + 1) begin
+                regmem[i] = i;
+            end
+            regmem[0] = 32'b0;
+        end
+        else
+            regmem [Dest_wb] = Result_WB;
     end
-
-    always @(negedge clk) begin
-        if (rst)
-            for (i = 0; i < WORD_COUNT; i = i + 1)
-                registerFile[i] <= i;
-        if (regWrite)
-            registerFile[writeRegister] <= writeData;
-    end
-
-    assign readData1 = (regRead)? registerFile[readRegister1] : {WORD_LEN{1'bz}};
-    assign readData2 = (regRead)? registerFile[readRegister2] : {WORD_LEN{1'bz}};
-
 endmodule
