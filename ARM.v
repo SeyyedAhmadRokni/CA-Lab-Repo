@@ -173,7 +173,7 @@ module ARM
 		////////////////////	GPIO	////////////////////////////
 		GPIO_0,							//	GPIO Connection 0
 		GPIO_1,							//	GPIO Connection 1
-		Test_wire_2
+		// Test_wire_2
 	);
 
 ////////////////////////	Clock Input	 	////////////////////////
