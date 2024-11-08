@@ -172,8 +172,7 @@ module ARM
 		TD_CLK27,                  //	TV Decoder 27MHz CLK
 		////////////////////	GPIO	////////////////////////////
 		GPIO_0,							//	GPIO Connection 0
-		GPIO_1,							//	GPIO Connection 1
-		Test_wire_2
+		GPIO_1							//	GPIO Connection 1
 	);
 
 ////////////////////////	Clock Input	 	////////////////////////
@@ -302,85 +301,12 @@ input          TD_CLK27;            //	TV Decoder 27MHz CLK
 ////////////////////////	GPIO	////////////////////////////////
 inout	[35:0]	GPIO_0;					//	GPIO Connection 0
 inout	[35:0]	GPIO_1;					//	GPIO Connection 1
-output [31:0] Test_wire_2;
-
-wire [31:0] WB_PC_reg_out;
-//assign Test_wire = {IF_Instruction[23:16], IF_Instruction[23:16], IF_Instruction[23:16], IF_Instruction[23:16]};
-wire rst;
-assign rst = SW[0];
-wire [31:0] IF_PC, IF_Instruction/* keep synthesis */;
-IF_Stage if_stage(
-    .clk(CLOCK_50), .rst(rst), .freeze(SW[1]), .Branch_taken(1'b0),
-    .BranchAddr(32'b0),
-    .PC(IF_PC), .Instruction(IF_Instruction)
-);
-
-assign Test_wire_2 = WB_PC_reg_out;
-
-wire [31:0] IF_PC_reg_out /* keep synthesis */;
-wire [31:0] IF_Instruction_reg_out /* keep synthesis */;
-IF_Stage_Reg if_stage_reg(
-    .clk(CLOCK_50), .rst(rst), .freeze(1'b0), .flush(1'b0),
-    .PC_in(IF_PC), .Instruction_in(IF_Instruction),
-    .PC(IF_PC_reg_out), .Instruction(IF_Instruction_reg_out)
-);
-
-wire [31:0] ID_PC;	
-ID_Stage id_stage(
-    .clk(CLOCK_50), .rst(rst),
-    .PC_in(IF_PC_reg_out), .PC(ID_PC)
-);
-
-
-wire [31:0] ID_PC_reg_out;
-reg [31:0] ID_Instruction_reg_out;
-ID_Stage_Reg id_stage_reg(
-    .clk(CLOCK_50), .rst(rst),
-    .PC_in(ID_PC),
-    .PC(ID_PC_reg_out)
-);
-
-wire [31:0] EXE_PC;	
-EXE_Stage exe_stage(
-    .clk(CLOCK_50), .rst(rst),
-    .PC_in(ID_PC_reg_out), .PC(EXE_PC)
-);
-
-
-wire [31:0] EXE_PC_reg_out /* keep synthesis */;
-reg [31:0] EXE_Instruction_reg_out /* keep synthesis */;
-EXE_Stage_Reg exe_stage_reg(
-    .clk(CLOCK_50), .rst(rst),
-    .PC_in(EXE_PC),
-    .PC(EXE_PC_reg_out)
-);
-
-wire [31:0] MEM_PC;	
-MEM_Stage mem_stage(
-    .clk(CLOCK_50), .rst(rst),
-    .PC_in(EXE_PC_reg_out), .PC(MEM_PC)
-);
-
-
-wire [31:0] MEM_PC_reg_o;
-reg [31:0]MEM_Instruction_reg_out;
-MEM_Stage_Reg mem_stage_reg(
-    .clk(CLOCK_50), .rst(rst),
-    .PC_in(MEM_PC),
-    .PC(MEM_PC_reg_o)
-);
-
-wire [31:0] WB_PC;	
-WB_Stage wb_stage(
-    .clk(CLOCK_50), .rst(rst),
-    .PC_in(MEM_PC_reg_o), .PC(WB_PC)
-);
-
-
-reg [31:0] WB_Instruction_reg_out;
-WB_Stage_Reg wb_stage_reg(
-    .clk(CLOCK_50), .rst(rst),
-    .PC_in(WB_PC),
-    .PC(WB_PC_reg_out)
-);
+	
+	CPU cpu(
+		.clk(CLOCK_50), .rst(SW[0]), .forwardENIn(SW[1]), 
+		.SC_SRAM_DQ(SRAM_DQ), .SC_SRAM_ADDR(SRAM_ADDR), .SC_SRAM_UB_N(SRAM_UB_N), 
+		.SC_SRAM_LB_N(SRAM_LB_N), .SC_SRAM_WE_N(SRAM_WE_N), .SC_SRAM_CE_N(SRAM_CE_N), 
+		.SC_SRAM_OE_N(SRAM_OE_N), .SC_READ_DATA(READ_DATA)
+	);
+	
 endmodule

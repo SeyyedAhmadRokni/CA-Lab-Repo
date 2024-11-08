@@ -1,33 +1,23 @@
 
-module ID_Stage(clk, rst, MEM_W_ENIn, WB_ENIn, HazardIn,
-                WB_DestIn,
-                PCIn, instructionIn, WB_ValueIn,
-                PCOut, val_RnOut, val_RmOut,
-                Two_srcOut, statusIn, SOut, BOut, MEM_W_ENOut, MEM_R_ENOut, WB_ENOut, iOut,
-                EXE_CMDOut, DestOut, RnOut, regFileInp2Out,
-                shiftOperandOut, immOut);
+module ID_Stage(clk, rst, instructionIn, WB_ENIn, WB_DestIn, WB_ValueIn, 
+                HazardIn, PCIn, statusIn, PCOut, Val_RnOut, Val_RmOut, 
+                TwoSrcOut, SOut, BOut, EXE_CMDOut, MEM_W_ENOut, MEM_R_ENOut,
+                DestOut, IOut, regFileInp2Out, RnOut, shiftOperandOut, 
+                WB_ENOut, Imm24Out, src1Out, src2Out);
 
-    parameter SIZE = 32;
-
-    input wire clk, rst, MEM_W_ENIn, WB_ENIn, HazardIn;
-    input wire[3:0] WB_DestIn;
-    input wire[SIZE-1:0] PCIn, instructionIn, WB_ValueIn;
-
-    output wire[SIZE-1:0] PCOut, val_RnOut, val_RmOut;
-    output wire Two_srcOut, statusIn, SOut, BOut, MEM_W_ENOut, MEM_R_ENOut, WB_ENOut, iOut;
-    output wire[3:0] EXE_CMDOut, DestOut, RnOut, regFileInp2Out;
+    parameter N = 32;
+    
+    input wire[0:0] clk, rst, WB_ENIn, HazardIn;
+    input wire[3:0] WB_DestIn, statusIn;
+    input wire[N - 1:0] PCIn, instructionIn, WB_ValueIn;
+    output wire[N - 1:0] PCOut, Val_RnOut, Val_RmOut;
+    output wire[0:0] TwoSrcOut, SOut, BOut, MEM_W_ENOut, MEM_R_ENOut, WB_ENOut, IOut;
+    output wire[3:0] EXE_CMDOut, DestOut, regFileInp2Out, RnOut, src1Out, src2Out;
     output wire[11:0] shiftOperandOut;
-    output wire[23:0] immOut;
-
-    wire[3:0] cond;
-    assign cond = instructionIn[31:28];
+    output wire[23:0] Imm24Out;
 
     wire[1:0] mode;
     assign mode = instructionIn[27:26];
-
-    wire[0:0] i;
-    assign i = instructionIn[25];
-    assign iOut = i;
 
     wire[3:0] opCode;
     assign opCode = instructionIn[24:21];
@@ -38,54 +28,74 @@ module ID_Stage(clk, rst, MEM_W_ENIn, WB_ENIn, HazardIn,
     wire[3:0] rn;
     assign rn = instructionIn[19:16];
     assign RnOut = rn;
+    assign src1Out = RnOut;
 
     wire[3:0] rd;
     assign rd = instructionIn[15:12];
     assign DestOut = rd;
 
-    assign shiftOperandOut = instructionIn[11:0];
-    assign immOut = instructionIn[23:0];
-
-    //?
     wire[3:0] rm;
     assign rm = instructionIn[3:0];
 
-    wire[3:0] readReg2;
+    wire[3:0] cond;
+    assign cond = instructionIn[31:28];
 
-    multiplexer2Input #(.WIDTH(4)) reg_mux (rd, rm, MEM_W_ENIn, regFileInp2Out);
+    assign shiftOperandOut = instructionIn[11:0];
+    assign Imm24Out = instructionIn[23:0];
 
-    RegisterFile registerFile(
-        .clk(clk), .rst(rst),
-        .src1(rn), .src2(regFileInp2Out), .Dest_wb(WB_DestIn),
-        .Result_WB(WB_ValueIn),
-        .writeBackEn(WB_ENIn),
-        .reg1(val_RnOut), .reg2(val_RnOut)
-    );
+    wire[0:0] i;
+    assign i = instructionIn[25];
+    assign IOut = i;
 
-    assign Two_srcOut = ~i | MEM_W_ENIn;
-
-    wire conditionCheckOut;
-    ConditionCheck conditionCheck(.condIn(cond), .condOut(conditionCheckOut), .statusIn(statusIn));
-
-    wire conditionCheckOutOrHazard;
-    // assign conditionCheckOutOrHazard = conditionCheckOut | HazardIn;
-    assign conditionCheckOutOrHazard = 1'b0;
 
     wire[8:0] controlUnitOut;
-    ControlUnit controlUnit(.opCodeIn(opCode), .SIn(s), .modeIn(mode), 
-                            .EXE_CMDOut(controlUnitOut[3:0]), .SOut(controlUnitOut[4]), .BOut(controlUnitOut[5]), 
-                            .MEM_W_ENOut(controlUnitOut[6]), .MEM_R_ENOut(controlUnitOut[7]), .WB_ENOut(controlUnitOut[8]));
+    ControlUnit controlUnit(
+        .opCodeIn(opCode), .SIn(s), .modeIn(mode), 
+        .EXE_CMDOut(controlUnitOut[3:0]), .SOut(controlUnitOut[4]), 
+        .BOut(controlUnitOut[5]), .MEM_W_ENOut(controlUnitOut[6]), 
+        .MEM_R_ENOut(controlUnitOut[7]), .WB_ENOut(controlUnitOut[8])
+    );
 
-    wire[8:0] conditionCheckMuxOut;
+    wire[0:0] conditionCheckOut;
+    ConditionCheck conditionCheck(
+        .condIn(cond), .condOut(conditionCheckOut), .statusIn(statusIn)
+    );
 
-    mux2Input #(.WIDTH(9))  conditionCheckMux(.in0(controlUnitOut), .in1(9'b0), .sel(conditionCheckOutOrHazard), .out(conditionCheckMuxOut));
+    wire[0:0] controlSignalsSelector;
+    assign controlSignalsSelector = (~conditionCheckOut) | HazardIn;
 
-    assign EXE_CMDOut = conditionCheckMuxOut[3:0];
-    assign SOut = conditionCheckMuxOut[4];
-    assign BOut = conditionCheckMuxOut[5];
-    assign MEM_W_ENOut = conditionCheckMuxOut[6];
-    assign MEM_R_ENOut = conditionCheckMuxOut[7];
-    assign WB_ENOut = conditionCheckMuxOut[8];
+    wire[8:0] signals;
+    multiplexer2Input #(9) controlSignalsMux(
+        .a(controlUnitOut), .b(9'b0), .s(controlSignalsSelector), .out(signals)
+    );
+
+    assign EXE_CMDOut = signals[3:0];
+    assign SOut = signals[4];
+    assign BOut = signals[5];
+    assign MEM_W_ENOut = signals[6];
+    assign MEM_R_ENOut = signals[7];
+    assign WB_ENOut = signals[8];
+
+
+    wire[3:0] regInp2;
+    multiplexer2Input #(4) regInp2Mux(
+        .a(rm), .b(rd), .s(controlUnitOut[6]), .out(regInp2)        
+    );
+    assign regFileInp2Out = regInp2;
+    assign src2Out = regInp2;
+
+    wire [0:0] notBranch;
+    assign notBranch = ~controlUnitOut[5];
+
+    RegisterFile registerFile(
+        .clk(clk), .rst(rst), .regWrite(WB_ENIn), .regRead(notBranch),
+        .readRegister1(rn), .readRegister2(regInp2),
+        .writeRegister(WB_DestIn), .writeData(WB_ValueIn),
+        .readData1(Val_RnOut), .readData2(Val_RmOut)
+    );
+
+    assign TwoSrcOut = ~i | controlUnitOut[6];
 
     assign PCOut = PCIn;
+
 endmodule

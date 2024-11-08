@@ -1,8 +1,8 @@
-module ConditionCheck(
-    input [3:0] condIn,
-    input [3:0] statusIn,
-    output reg condOut
-);
+module ConditionCheck(condIn, condOut, statusIn);
+    input [3:0] condIn;
+    input [3:0] statusIn;
+    output reg condOut;
+
     wire n, z, c, v;
     assign {n, z, c, v} = statusIn;
 
@@ -27,5 +27,4 @@ module ConditionCheck(
             default: condOut = 1'bx;
         endcase
     end
-    
 endmodule
