@@ -1,5 +1,5 @@
 module CPU(input clk, rst,
-			output [3:0] PC);
+			output [31:0] PC);
 
     wire[31:0] 
 		// IF IFR ID
@@ -52,8 +52,6 @@ module CPU(input clk, rst,
 	assign IF_freeze = 1'b0;
 	assign IF_Branch_taken = 1'b0;
 	assign IF_BranchAddr = 32'b0;
-
-	assign PC = IF_PC[3:0];
 
 	IF_Stage if_stage(
 		.clk(clk), .rst(rst), .freeze(IF_freeze), .Branch_taken(IF_Branch_taken),
@@ -126,7 +124,7 @@ module CPU(input clk, rst,
 	);
 
 
-	wire [31:0] MEM_PC_reg_o;
+	wire [31:0] MEM_PC_reg_o, WB_PC;
 	MEM_Stage_Reg mem_stage_reg(
 		.clk(clk), .rst(rst),
 		.PC_in(MEM_PC),
@@ -138,5 +136,6 @@ module CPU(input clk, rst,
 		.PC_in(MEM_PC_reg_o), .PC(WB_PC)
 	);
 
+	assign PC = WB_PC;
 
 endmodule
