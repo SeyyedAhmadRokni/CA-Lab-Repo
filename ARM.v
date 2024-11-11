@@ -303,6 +303,6 @@ input          TD_CLK27;            //	TV Decoder 27MHz CLK
 inout	[35:0]	GPIO_0;					//	GPIO Connection 0
 inout	[35:0]	GPIO_1;					//	GPIO Connection 1
 	
-	CPU cpu(.clk(CLOCK_50), .rst(SW[0]));
+	CPU cpu(.clk(CLOCK_50), .rst(SW[0]), .PC(LEDR[3:0]));
 	
 endmodule
