@@ -1,9 +1,4 @@
-module CPU(clk, rst, forwardENIn,
-			SC_SRAM_DQ, SC_SRAM_ADDR, SC_SRAM_UB_N, 
-			SC_SRAM_LB_N, SC_SRAM_WE_N, SC_SRAM_CE_N, 
-			SC_SRAM_OE_N, SC_READ_DATA);
-
-    input clk, rst, forwardENIn;
+module CPU(input clk, rst);
 
     wire[31:0] 
 		// IF IFR ID
@@ -20,7 +15,7 @@ module CPU(clk, rst, forwardENIn,
 
 	wire[3:0]
 		WB_ID_WB_Dest, 
-		IDR_STAT, EX_STAT, STAT_Out,
+		IDR_STAT, EX_STAT, STATUS_Out,
 		ID_IDR_Dest, IDR_EX_Dest, 
 		ID_IDR_src1, ID_IDR_src2,  
 		IDR_EX_src1, IDR_EX_src2,  
@@ -33,7 +28,7 @@ module CPU(clk, rst, forwardENIn,
 	wire[23:0]
 		ID_IDR_Imm24, IDR_EX_Imm24;
 
-	wire[0:0] 
+	wire
 		ID_IDR_WB_EN, IDR_EX_WB_EN, 
 		ID_IDR_MEM_R_EN, IDR_EX_MEM_R_EN, 
 		ID_IDR_MEM_W_EN, IDR_EX_MEM_W_EN, 
@@ -41,41 +36,21 @@ module CPU(clk, rst, forwardENIn,
 		ID_IDR_S, IDR_EX_S,
 		WB_ID_WB_EN, 
 		ID_IDR_I, IDR_EX_I,
-		HazardOut,
+		HazardOut,ID_HZ_TwoSrc,
 		SC_READY; 
 
-	inout wire[15:0] SC_SRAM_DQ;
-	output wire[17:0] SC_SRAM_ADDR;
-	output wire[0:0]  SC_SRAM_UB_N, SC_SRAM_LB_N, SC_SRAM_WE_N, SC_SRAM_CE_N, SC_SRAM_OE_N;
-	output wire[31:0] SC_READ_DATA;	
-
-	wire [31:0] IF_PC, IF_Instruction, IF_BranchAddr;
-	wire IF_freeze, IF_Branch_taken, IF_flush;
-
-	assign IF_freeze = 1'b0;
-	assign IF_Branch_taken = 1'b0;
-	assign IF_BranchAddr = 32'b0;
-
-	IF_Stage if_stage(
-		.clk(clk), .rst(rst), .freeze(IF_freeze), .Branch_taken(IF_Branch_taken),
-		.BranchAddr(IF_BranchAddr),
-		.PC(IF_PC), .Instruction(IF_Instruction)
-	);
-
-	IF_Stage_Reg if_stage_reg(
-		.clk(clk), .rst(rst), .freeze(IF_freeze), .flush(IF_flush),
-		.PC_in(IF_IFR_PC), .Instruction_in(IF_IFR_Instruction),
-		.PC(IFR_ID_PC), .Instruction(IFR_ID_Instruction)
-	);
-
-
+		assign STATUS_Out = 4'b0;
+		assign WB_ID_WB_Dest = 4'b0;
+		assign WB_ID_WB_Value = 31'b0;
+		assign WB_ID_WB_EN = 1'b0;
+		assign HazardOut = 1'b0;
 
 	ID_Stage instDecode(
 		.clk(clk),                             .rst(rst),                  
 		.instructionIn(IFR_ID_Instruction),    .WB_ENIn(WB_ID_WB_EN),                 
 		.WB_DestIn(WB_ID_WB_Dest),             .WB_ValueIn(WB_ID_WB_Value),           
 		.HazardIn(HazardOut),      			   .PCIn(IFR_ID_PC),                      
-		.statusIn(STAT_Out),                   .PCOut(ID_IDR_PC),                     
+		.statusIn(STATUS_Out),                   .PCOut(ID_IDR_PC),                     
 		.Val_RnOut(ID_IDR_Val_Rn),             .Val_RmOut(ID_IDR_Val_Rm),             
 		.TwoSrcOut(ID_HZ_TwoSrc),              .SOut(ID_IDR_S),               
 		.BOut(ID_IDR_B),                       .EXE_CMDOut(ID_IDR_EXE_CMD), 
@@ -102,43 +77,9 @@ module CPU(clk, rst, forwardENIn,
 		.IIn(ID_IDR_I),                       .IOut(IDR_EX_I),      
 		.Imm24In(ID_IDR_Imm24),               .Imm24Out(IDR_EX_Imm24), 
 		.DestIn(ID_IDR_Dest),                 .DestOut(IDR_EX_Dest), 
-		.statusIn(STAT_Out),                  .statusOut(IDR_STAT),
+		.statusIn(STATUS_Out),                  .statusOut(IDR_STAT),
 		.src1In(ID_IDR_src1),   		      .src1Out(IDR_EX_src1),
 		.src2In(ID_IDR_src2),   		      .src2Out(IDR_EX_src2)
 	);
-
-	wire [31:0] EXE_PC;	
-	EXE_Stage exe_stage(
-		.clk(clk), .rst(rst),
-		.PC_in(IDR_EX_PC), .PC(EXE_PC)
-	);
-
-
-	wire [31:0] EXE_PC_reg_out;
-	EXE_Stage_Reg exe_stage_reg(
-		.clk(clk), .rst(rst),
-		.PC_in(EXE_PC),
-		.PC(EXE_PC_reg_out)
-	);
-
-	wire [31:0] MEM_PC;	
-	MEM_Stage mem_stage(
-		.clk(clk), .rst(rst),
-		.PC_in(EXE_PC_reg_out), .PC(MEM_PC)
-	);
-
-
-	wire [31:0] MEM_PC_reg_o;
-	MEM_Stage_Reg mem_stage_reg(
-		.clk(clk), .rst(rst),
-		.PC_in(MEM_PC),
-		.PC(MEM_PC_reg_o)
-	);
-
-	WB_Stage wb_stage(
-		.clk(clk), .rst(rst),
-		.PC_in(MEM_PC_reg_o), .PC(WB_PC)
-	);
-
 
 endmodule
