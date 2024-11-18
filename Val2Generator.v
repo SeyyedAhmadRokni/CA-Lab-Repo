@@ -16,14 +16,11 @@ module Val2Generate(valRmIn, shiftOperandIn, IIn, STypeSignal, valOut);
 
     always @(valRmIn, shiftOperandIn, IIn, STypeSignal) begin
         valOut = 32'b0;
-        // -------------------------- LDR SDR ---------------------------
-        if (STypeSignal) begin  
+        if (STypeSignal) begin  //LDR SDR
             valOut = {{20{shiftOperandIn[11]}}, shiftOperandIn};
         end
 
-
-        // ---------------------- 32-bit Immediate ----------------------
-        else if (IIn) begin // 
+        else if (IIn) begin // 32-bit immediate
             valOut = {24'b0, immed_8};
             for (i = 0; i < 2 * rotate_imm; i = i + 1) begin
                 valOut = {valOut[0], valOut[31:1]};
@@ -31,13 +28,12 @@ module Val2Generate(valRmIn, shiftOperandIn, IIn, STypeSignal, valOut);
 
         end
 
-        // ---------------------- Immediate Shifts -----------------------
-        else begin 
+        else begin // immediate shifts
             case (shift)
-                    2'b00: valOut = valRmIn << shift_imm;           // LSL
-                    2'b01: valOut = valRmIn >> shift_imm;           // LSR
-                    2'b10: valOut = $signed(valRmIn) >>> shift_imm; // ASR
-                    2'b11: begin                                    // ROR
+                    2'b00: valOut = valRmIn << shift_imm;
+                    2'b01: valOut = valRmIn >> shift_imm;
+                    2'b10: valOut = $signed(valRmIn) >>> shift_imm;
+                    2'b11: begin
                         valOut = valRmIn;
                         for (i = 0; i < shift_imm; i = i + 1) begin
                             valOut = {valOut[0], valOut[31:1]};
