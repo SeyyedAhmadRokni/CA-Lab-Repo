@@ -1,57 +1,56 @@
 module CPU(input clk, rst,
 			output [31:0] PC);
 
-    wire[31:0] 
-		// IF IFR ID
-		IF_IFR_PC/*keep synthesis*/, IFR_ID_PC/*keep synthesis*/, 
-		IF_IFR_Instruction/*keep synthesis*/, IFR_ID_Instruction/*keep synthesis*/,
-		IFR_ID_MEM_W/*keep synthesis*/,
-		// ID IDR EX
-		ID_IDR_PC/*keep synthesis*/, IDR_EX_PC/*keep synthesis*/,  
-		ID_IDR_Val_Rn/*keep synthesis*/, IDR_EX_Val_Rn/*keep synthesis*/, 
-		ID_IDR_Val_Rm/*keep synthesis*/, IDR_EX_Val_Rm/*keep synthesis*/, 
-		// WB ID
-		WB_ID_WB_Value;
+	wire [31:0] 
+        // IF, IFR, ID
+        IF_IFR_PC, IFR_ID_PC, 
+        IF_IFR_Instruction, IFR_ID_Instruction,
+        IFR_ID_MEM_W,
+        // ID, IDR, EX
+        ID_IDR_PC, IDR_EX_PC,  
+        ID_IDR_Val_Rn, IDR_EX_Val_Rn, 
+        ID_IDR_Val_Rm, IDR_EX_Val_Rm,
+        // WB, ID
+        WB_ID_WB_Value,
+        EXE_EXER_ALU_Res, EXE_EXER_Val_Rm, EXE_EXER_branchAddress;
 
+    wire [3:0]
+        WB_ID_WB_Dest, 
+        IDR_STAT, EX_STAT, STAT_Out,
+        ID_IDR_Dest, IDR_EX_Dest, EXE_EXER_Dest, 
+        ID_IDR_src1, ID_IDR_src2,  
+        IDR_EX_src1, IDR_EX_src2,  
+        ID_IDR_EXE_CMD, IDR_EX_EXE_CMD;
 
-	wire[3:0]
-		WB_ID_WB_Dest, 
-		IDR_STAT, EX_STAT, STAT_Out,
-		ID_IDR_Dest, IDR_EX_Dest, 
-		ID_IDR_src1, ID_IDR_src2,  
-		IDR_EX_src1, IDR_EX_src2,  
-		ID_IDR_EXE_CMD, IDR_EX_EXE_CMD,
-		ID_HZ_RegSrc2, ID_HZ_Rn;
+    wire [11:0]
+        ID_IDR_ShiftOperand, IDR_EX_ShiftOperand;
 
-	wire[11:0]
-		ID_IDR_ShiftOperand, IDR_EX_ShiftOperand;
+    wire [23:0]
+        ID_IDR_Imm24, IDR_EX_Imm24;
 
-	wire[23:0]
-		ID_IDR_Imm24, IDR_EX_Imm24;
+    wire
+        ID_IDR_WB_EN, IDR_EX_WB_EN, EXE_EXER_WB_EN, 
+        ID_IDR_MEM_R_EN, IDR_EX_MEM_R_EN, EXE_EXER_MEM_R_EN,
+        ID_IDR_MEM_W_EN, IDR_EX_MEM_W_EN, EXE_EXER_MEM_W_EN,
+        ID_IDR_B, BranchTaken, 
+        ID_IDR_S, IDR_EX_S, EXE_EXER_S,
+        WB_ID_WB_EN, 
+        ID_IDR_I, IDR_EX_I,
+        HazardOut, ID_HZ_TwoSrc,
+        SC_READY; 
 
-	wire
-		ID_IDR_WB_EN, IDR_EX_WB_EN, 
-		ID_IDR_MEM_R_EN, IDR_EX_MEM_R_EN, 
-		ID_IDR_MEM_W_EN, IDR_EX_MEM_W_EN, 
-		ID_IDR_B, BranchTaken, 
-		ID_IDR_S, IDR_EX_S,
-		WB_ID_WB_EN, 
-		ID_IDR_I, IDR_EX_I,
-		HazardOut,ID_HZ_TwoSrc,
-		SC_READY; 
+    assign STAT_Out = 4'b0;
+    assign WB_ID_WB_Dest = 4'b0;
+    assign WB_ID_WB_Value = 31'b0;
+    assign WB_ID_WB_EN = 1'b0;
+    assign HazardOut = 1'b0;
+    assign SC_READY = 1'b1;
 
-	assign STAT_Out = 4'b0;
-	assign WB_ID_WB_Dest = 4'b0;
-	assign WB_ID_WB_Value = 31'b0;
-	assign WB_ID_WB_EN = 1'b0;
-	assign HazardOut = 1'b0;
-	assign SC_READY = 1'b1;
+    wire [31:0] IF_BranchAddr;
+    wire IF_freeze, IF_Branch_taken, IF_flush;
 
-	wire [31:0] IF_BranchAddr;
-	wire IF_freeze, IF_Branch_taken, IF_flush;
-
-	assign IF_freeze = 1'b0;
-	assign IF_Branch_taken = 1'b0;
+    assign IF_freeze = 1'b0;
+    assign IF_Branch_taken = 1'b0;
 	assign IF_BranchAddr = 32'b0;
 
 	IF_Stage if_stage(
@@ -65,8 +64,6 @@ module CPU(input clk, rst,
 		.PC_in(IF_IFR_PC), .Instruction_in(IF_IFR_Instruction),
 		.PC(IFR_ID_PC), .Instruction(IFR_ID_Instruction)
 	);
-
-
 
 	ID_Stage instDecode(
 		.clk(clk),                             .rst(rst),                  
@@ -105,24 +102,56 @@ module CPU(input clk, rst,
 		.src2In(ID_IDR_src2),   		      .src2Out(IDR_EX_src2)
 	);
 
-	wire [31:0] EXE_PC;	
 	EXE_Stage exe_stage(
-		// .clk(clk), .rst(rst),
-		.PC_in(IDR_EX_PC), .PC(EXE_PC)
-	);
-	
-	wire [31:0] EXE_PC_reg_out;
+        .clk(clk), .rst(rst),
+        .WB_ENIn(IDR_EX_WB_EN),           .MEM_R_ENIn(IDR_EX_MEM_R_EN),
+        .MEM_W_ENIn(IDR_EX_MEM_W_EN),     .EXE_CMDIn(IDR_EX_EXE_CMD),
+        .SIn(IDR_EX_S),                   .PCIn(IDR_EX_PC),
+        .Val_RnIn(IDR_EX_Val_Rn),         .Val_RmIn(IDR_EX_Val_Rm),
+        .shiftOperandIn(IDR_EX_ShiftOperand),
+        .IIn(IDR_EX_I),                   .Imm24In(IDR_EX_Imm24),
+        .DestIn(IDR_EX_Dest),             .statusIn(IDR_STAT),
+        .WB_ENOut(EXE_EXER_WB_EN),        .MEM_R_ENOut(EXE_EXER_MEM_R_EN),
+        .MEM_W_ENOut(EXE_EXER_MEM_W_EN),  .ALU_ResOut(EXE_EXER_ALU_Res),
+        .Val_RmOut(EXE_EXER_Val_Rm),      .DestOut(EXE_EXER_Dest),
+        .statusOut(EX_STAT),              .branchAddressOut(EXE_EXER_branchAddress),
+        .SOut(EXE_EXER_S)
+    );
+
+	wire [31:0] 
+        EXE_MEM_ALU_Res, 
+        EXE_MEM_Val_Rm, 
+        EXE_MEM_branchAddress;
+
+    wire [3:0] 
+        EXE_MEM_Dest, 
+        EXE_MEM_status;
+
+    wire 
+        EXE_MEM_WB_EN, 
+        EXE_MEM_MEM_R_EN, 
+        EXE_MEM_MEM_W_EN, 
+        EXE_MEM_S;	
+
 	EXE_Stage_Reg exe_stage_reg(
-		.clk(clk), .rst(rst),
-		.PC_in(EXE_PC),
-		.PC(EXE_PC_reg_out)
-	);
+        .clk(clk), .rst(rst), 
+        .WB_ENIn(EXE_EXER_WB_EN),            .WB_ENOut(EXE_MEM_WB_EN),
+        .MEM_R_ENIn(EXE_EXER_MEM_R_EN),      .MEM_R_ENOut(EXE_MEM_MEM_R_EN),
+        .MEM_W_ENIn(EXE_EXER_MEM_W_EN),      .MEM_W_ENOut(EXE_MEM_MEM_W_EN),
+        .ALU_ResIn(EXE_EXER_ALU_Res),        .ALU_ResOut(EXE_MEM_ALU_Res),
+        .Val_RmIn(EXE_EXER_Val_Rm),          .Val_RmOut(EXE_MEM_Val_Rm),
+        .DestIn(EXE_EXER_Dest),              .DestOut(EXE_MEM_Dest),
+        .statusIn(EX_STAT),                  .statusOut(EXE_MEM_status),
+        .branchAddressIn(EXE_EXER_branchAddress), .branchAddressOut(EXE_MEM_branchAddress),
+        .SIn(EXE_EXER_S),                    .SOut(EXE_MEM_S)
+    );
 
 	wire [31:0] MEM_PC;	
 	MEM_Stage mem_stage(
 		// .clk(clk), .rst(rst),
 		.PC_in(EXE_PC_reg_out), .PC(MEM_PC)
 	);
+
 
 
 	wire [31:0] MEM_PC_reg_o, WB_PC;
