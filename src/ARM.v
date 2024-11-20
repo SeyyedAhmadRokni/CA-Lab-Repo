@@ -304,6 +304,15 @@ input          TD_CLK27;            //	TV Decoder 27MHz CLK
 inout	[35:0]	GPIO_0;					//	GPIO Connection 0
 inout	[35:0]	GPIO_1;					//	GPIO Connection 1
 output [31:0]	 PC;
+
+	// reg [2:0] nim_clock;
+	// always @(posedge CLOCK_50, posedge SW[0])begin
+	// 	if (SW[0]) begin
+	// 		nim_clock = 3'b0;	
+	// 	end
+	// 	nim_clock = nim_clock + 1; 
+	// end
+
 	CPU cpu(.clk(CLOCK_50), .rst(SW[0]), .PC(PC));
 	
 endmodule

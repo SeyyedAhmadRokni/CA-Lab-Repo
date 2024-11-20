@@ -8,10 +8,10 @@ module ID_Stage_Reg(clk, rst, en, clr, PCIn, PCOut, WB_ENIn, WB_ENOut,
                     src1In, src1Out, src2In, src2Out);
     parameter N = 32;
 
-    input wire[0:0] clk, rst, en, clr;
+    input clk, rst, en, clr;
     
-    input wire[0:0] WB_ENIn, MEM_R_ENIn, MEM_W_ENIn, BIn, SIn, IIn;
-    output reg[0:0] WB_ENOut,MEM_R_ENOut,MEM_W_ENOut,BOut,SOut,IOut;
+    input WB_ENIn, MEM_R_ENIn, MEM_W_ENIn, BIn, SIn, IIn;
+    output reg WB_ENOut,MEM_R_ENOut,MEM_W_ENOut,BOut,SOut,IOut;
 
     input wire[3:0] EXE_CMDIn, DestIn, statusIn, src1In, src2In;
     output reg[3:0] EXE_CMDOut,DestOut, statusOut, src1Out, src2Out;
@@ -26,7 +26,7 @@ module ID_Stage_Reg(clk, rst, en, clr, PCIn, PCOut, WB_ENIn, WB_ENOut,
     output reg[31:0] PCOut,Val_RmOut,Val_RnOut;
 
 
-    always@(posedge clk or posedge rst) begin
+    always@(posedge clk, posedge rst) begin
 
         if (rst) begin
             WB_ENOut        <= 1'b0;

@@ -11,8 +11,8 @@ module IF_Stage(
     adder addPc(32'd4, pc_out, adder_out, adder_carryOut);
     multiplexer2Input mux2Input(adder_out, BranchAddr, Branch_taken, mux_out);
     InstMemory instMem(rst, pc_out, instMem_out);
-    PC pc(clk, rst, freeze, mux_out, pc_out);
-    
+    PC pc(.clk(clk), .rst(rst), .freeze(freeze), .in(mux_out), .out(pc_out));
+
     assign PC = adder_out;
     assign Instruction = instMem_out;
 

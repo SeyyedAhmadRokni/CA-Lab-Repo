@@ -7,11 +7,11 @@ module ID_Stage(clk, rst, instructionIn, WB_ENIn, WB_DestIn, WB_ValueIn,
 
     parameter N = 32;
     
-    input wire[0:0] clk, rst, WB_ENIn, HazardIn;
+    input clk, rst, WB_ENIn, HazardIn;
     input wire[3:0] WB_DestIn, statusIn;
     input wire[N - 1:0] PCIn, instructionIn, WB_ValueIn;
     output wire[N - 1:0] PCOut, Val_RnOut, Val_RmOut;
-    output wire[0:0] TwoSrcOut, SOut, BOut, MEM_W_ENOut, MEM_R_ENOut, WB_ENOut, IOut;
+    output TwoSrcOut, SOut, BOut, MEM_W_ENOut, MEM_R_ENOut, WB_ENOut, IOut;
     output wire[3:0] EXE_CMDOut, DestOut, regFileInp2Out, RnOut, src1Out, src2Out;
     output wire[11:0] shiftOperandOut;
     output wire[23:0] Imm24Out;
@@ -22,7 +22,7 @@ module ID_Stage(clk, rst, instructionIn, WB_ENIn, WB_DestIn, WB_ValueIn,
     wire[3:0] opCode;
     assign opCode = instructionIn[24:21];
 
-    wire[0:0] s;
+    wire s;
     assign s = instructionIn[20];
 
     wire[3:0] rn;
@@ -43,7 +43,7 @@ module ID_Stage(clk, rst, instructionIn, WB_ENIn, WB_DestIn, WB_ValueIn,
     assign shiftOperandOut = instructionIn[11:0];
     assign Imm24Out = instructionIn[23:0];
 
-    wire[0:0] i;
+    wire i;
     assign i = instructionIn[25];
     assign IOut = i;
 
@@ -84,10 +84,7 @@ module ID_Stage(clk, rst, instructionIn, WB_ENIn, WB_DestIn, WB_ValueIn,
     assign regFileInp2Out = regInp2;
     assign src2Out = regInp2;
 
-    wire [0:0] notBranch;
-    assign notBranch = ~controlUnitOut[5];
-
-        RegisterFile registerFile(
+    RegisterFile registerFile(
         .clk(clk), .rst(rst), .src1(rn), .src2(regInp2),
         .Dest_wb(WB_DestIn), .Input_WB(WB_ValueIn),
         .writeBackEn(WB_ENIn),

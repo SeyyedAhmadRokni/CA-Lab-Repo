@@ -3,13 +3,13 @@ module CPU(input clk, rst,
 
     wire[31:0] 
 		// IF IFR ID
-		IF_IFR_PC, IFR_ID_PC, 
-		IF_IFR_Instruction, IFR_ID_Instruction,
-		IFR_ID_MEM_W,
+		IF_IFR_PC/*keep synthesis*/, IFR_ID_PC/*keep synthesis*/, 
+		IF_IFR_Instruction/*keep synthesis*/, IFR_ID_Instruction/*keep synthesis*/,
+		IFR_ID_MEM_W/*keep synthesis*/,
 		// ID IDR EX
-		ID_IDR_PC, IDR_EX_PC,  
-		ID_IDR_Val_Rn, IDR_EX_Val_Rn, 
-		ID_IDR_Val_Rm, IDR_EX_Val_Rm, 
+		ID_IDR_PC/*keep synthesis*/, IDR_EX_PC/*keep synthesis*/,  
+		ID_IDR_Val_Rn/*keep synthesis*/, IDR_EX_Val_Rn/*keep synthesis*/, 
+		ID_IDR_Val_Rm/*keep synthesis*/, IDR_EX_Val_Rm/*keep synthesis*/, 
 		// WB ID
 		WB_ID_WB_Value;
 
@@ -45,8 +45,9 @@ module CPU(input clk, rst,
 	assign WB_ID_WB_Value = 31'b0;
 	assign WB_ID_WB_EN = 1'b0;
 	assign HazardOut = 1'b0;
+	assign SC_READY = 1'b1;
 
-	wire [31:0] IF_PC, IF_Instruction, IF_BranchAddr;
+	wire [31:0] IF_BranchAddr;
 	wire IF_freeze, IF_Branch_taken, IF_flush;
 
 	assign IF_freeze = 1'b0;
@@ -106,7 +107,7 @@ module CPU(input clk, rst,
 
 	wire [31:0] EXE_PC;	
 	EXE_Stage exe_stage(
-		.clk(clk), .rst(rst),
+		// .clk(clk), .rst(rst),
 		.PC_in(IDR_EX_PC), .PC(EXE_PC)
 	);
 	
@@ -119,7 +120,7 @@ module CPU(input clk, rst,
 
 	wire [31:0] MEM_PC;	
 	MEM_Stage mem_stage(
-		.clk(clk), .rst(rst),
+		// .clk(clk), .rst(rst),
 		.PC_in(EXE_PC_reg_out), .PC(MEM_PC)
 	);
 
@@ -132,7 +133,7 @@ module CPU(input clk, rst,
 	);
 
 	WB_Stage wb_stage(
-		.clk(clk), .rst(rst),
+		// .clk(clk), .rst(rst),
 		.PC_in(MEM_PC_reg_o), .PC(WB_PC)
 	);
 
