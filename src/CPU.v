@@ -12,7 +12,7 @@ module CPU(input clk, rst,
         ID_IDR_Val_Rm, IDR_EX_Val_Rm,
         // WB, ID
         WB_ID_WB_Value,
-        EXE_EXER_ALU_Res, EXE_EXER_Val_Rm, EXE_EXER_branchAddress;
+        EXE_EXER_ALU_Res, EXE_EXER_Val_Rm, EXE_IF_branchAddress;
 
     wire [3:0]
         WB_ID_WB_Dest, 
@@ -20,7 +20,8 @@ module CPU(input clk, rst,
         ID_IDR_Dest, IDR_EX_Dest, EXE_EXER_Dest, 
         ID_IDR_src1, ID_IDR_src2,  
         IDR_EX_src1, IDR_EX_src2,  
-        ID_IDR_EXE_CMD, IDR_EX_EXE_CMD;
+        ID_IDR_EXE_CMD, IDR_EX_EXE_CMD,
+        ID_HZ_RegSrc2, ID_HZ_Rn;
 
     wire [11:0]
         ID_IDR_ShiftOperand, IDR_EX_ShiftOperand;
@@ -33,7 +34,7 @@ module CPU(input clk, rst,
         ID_IDR_MEM_R_EN, IDR_EX_MEM_R_EN, EXE_EXER_MEM_R_EN,
         ID_IDR_MEM_W_EN, IDR_EX_MEM_W_EN, EXE_EXER_MEM_W_EN,
         ID_IDR_B, BranchTaken, 
-        ID_IDR_S, IDR_EX_S, EXE_EXER_S,
+        ID_IDR_S, IDR_EX_S, EXE_STATUS_S,
         WB_ID_WB_EN, 
         ID_IDR_I, IDR_EX_I,
         HazardOut, ID_HZ_TwoSrc,
@@ -54,13 +55,13 @@ module CPU(input clk, rst,
 	assign IF_BranchAddr = 32'b0;
 
 	IF_Stage if_stage(
-		.clk(clk), .rst(rst), .freeze(IF_freeze), .Branch_taken(IF_Branch_taken),
-		.BranchAddr(IF_BranchAddr),
+		.clk(clk), .rst(rst), .freeze(IF_freeze), .Branch_taken(BranchTaken),
+		.BranchAddr(EXE_IF_branchAddress),
 		.PC(IF_IFR_PC), .Instruction(IF_IFR_Instruction)
 	);
 
 	IF_Stage_Reg if_stage_reg(
-		.clk(clk), .rst(rst), .freeze(IF_freeze), .flush(IF_flush),
+		.clk(clk), .rst(rst), .freeze(IF_freeze), .flush(BranchTaken),
 		.PC_in(IF_IFR_PC), .Instruction_in(IF_IFR_Instruction),
 		.PC(IFR_ID_PC), .Instruction(IFR_ID_Instruction)
 	);
@@ -114,37 +115,34 @@ module CPU(input clk, rst,
         .WB_ENOut(EXE_EXER_WB_EN),        .MEM_R_ENOut(EXE_EXER_MEM_R_EN),
         .MEM_W_ENOut(EXE_EXER_MEM_W_EN),  .ALU_ResOut(EXE_EXER_ALU_Res),
         .Val_RmOut(EXE_EXER_Val_Rm),      .DestOut(EXE_EXER_Dest),
-        .statusOut(EX_STAT),              .branchAddressOut(EXE_EXER_branchAddress),
-        .SOut(EXE_EXER_S)
+        .statusOut(EX_STAT),              .branchAddressOut(EXE_IF_branchAddress),
+        .SOut(EXE_STATUS_S),                .WB_ValueIn(),
+        .ALU_ResIn(),                     .selSrc1In(),
+        .selSrc2In()
     );
 
 	wire [31:0] 
-        EXE_MEM_ALU_Res, 
-        EXE_MEM_Val_Rm, 
-        EXE_MEM_branchAddress;
+        EXER_MEM_ALU_Res, 
+        EXER_MEM_Val_Rm;
 
     wire [3:0] 
         EXE_MEM_Dest, 
         EXE_MEM_status;
 
     wire 
-        EXE_MEM_WB_EN, 
-        EXE_MEM_MEM_R_EN, 
-        EXE_MEM_MEM_W_EN, 
-        EXE_MEM_S;	
+        EXER_MEM_WB_EN, 
+        EXER_MEM_MEM_R_EN, 
+        EXER_MEM_MEM_W_EN, 
+        EXER_MEM_S;	
 
-	EXE_Stage_Reg exe_stage_reg(
-        .clk(clk), .rst(rst), 
-        .WB_ENIn(EXE_EXER_WB_EN),            .WB_ENOut(EXE_MEM_WB_EN),
-        .MEM_R_ENIn(EXE_EXER_MEM_R_EN),      .MEM_R_ENOut(EXE_MEM_MEM_R_EN),
-        .MEM_W_ENIn(EXE_EXER_MEM_W_EN),      .MEM_W_ENOut(EXE_MEM_MEM_W_EN),
-        .ALU_ResIn(EXE_EXER_ALU_Res),        .ALU_ResOut(EXE_MEM_ALU_Res),
-        .Val_RmIn(EXE_EXER_Val_Rm),          .Val_RmOut(EXE_MEM_Val_Rm),
-        .DestIn(EXE_EXER_Dest),              .DestOut(EXE_MEM_Dest),
-        .statusIn(EX_STAT),                  .statusOut(EXE_MEM_status),
-        .branchAddressIn(EXE_EXER_branchAddress), .branchAddressOut(EXE_MEM_branchAddress),
-        .SIn(EXE_EXER_S),                    .SOut(EXE_MEM_S)
-    );
+    EXE_Stage_Reg exe_stage_reg(
+        .clk(clk), .rst(rst), .en(SC_READY), .clr(1'b0),
+        .WB_ENIn(EXE_EXER_WB_EN), .WB_ENOut(EXER_MEM_WB_EN), 
+        .MEM_R_ENIn(EXE_EXER_MEM_R_EN), .MEM_R_ENOut(EXER_MEM_MEM_R_EN),
+        .MEM_W_ENIn(EXE_EXER_MEM_W_EN), .MEM_W_ENOut(EXER_MEM_MEM_W_EN), 
+        .ALU_ResIn(EXE_EXER_ALU_Res), .ALU_ResOut(EXER_MEM_ALU_Res),
+        .Val_RmIn(EXE_EXER_Val_Rm), .Val_RmOut(EXER_MEM_Val_Rm),
+        .DestIn(EXE_EXER_Dest), .DestOut(DestOut));
 
 	wire [31:0] MEM_PC;	
 	MEM_Stage mem_stage(
