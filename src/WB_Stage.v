@@ -14,7 +14,7 @@ module WB_Stage(clk, rst, ALU_ResIn, DataMemoryIn,
     output wire WB_ENOut;
 
 
-    Multiplexer4Input mux(
+    multiplexer2Input mux(
         .a(ALU_ResIn), .b(DataMemoryIn), .s(MEM_R_ENIn), .out(WB_ValueOut)
     );
 

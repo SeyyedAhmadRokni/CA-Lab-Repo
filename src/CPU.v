@@ -68,11 +68,10 @@ module CPU(input clk, rst,
 
     wire [3:0] EX_EXR_Dest;
     
-    wire MEM_MEMR_MEM_R_EN و MEM_MEMR_WB_EN;
-
+    wire MEM_MEMR_MEM_R_EN;
     wire[3:0] MEM_MEMR_Dest;
 
-	wire[31:0] MEM_EX_ALU_Res و MEM_MEMR_MemoryData , MEM_MEMR_ALU;
+	wire[31:0] MEM_EX_ALU_Res , MEM_MEMR_MemoryData , MEM_MEMR_ALU;
 
 	ID_Stage instDecode(
 		.clk(clk),                             .rst(rst),                  
@@ -203,6 +202,6 @@ module CPU(input clk, rst,
 		.WB_ENOut(WB_ID_WB_EN),        .WB_ValueOut(WB_ID_WB_Value)
 	);
 
-	assign PC = WB_PC;
+	assign PC = WB_ID_WB_Value;
 
 endmodule
