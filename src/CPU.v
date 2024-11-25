@@ -40,31 +40,39 @@ module CPU(input clk, rst,
         HazardOut, ID_HZ_TwoSrc,
         SC_READY; 
 
-    assign STAT_Out = 4'b0;
-    assign WB_ID_WB_Dest = 4'b0;
-    assign WB_ID_WB_Value = 31'b0;
-    assign WB_ID_WB_EN = 1'b0;
-    assign HazardOut = 1'b0;
-    assign SC_READY = 1'b1;
+    // assign STAT_Out = 4'b0;
+    // assign WB_ID_WB_Dest = 4'b0;
+    // assign WB_ID_WB_Value = 31'b0;
+    // assign WB_ID_WB_EN = 1'b0;
+    // assign HazardOut = 1'b0;
+    // assign SC_READY = 1'b1;
 
     wire [31:0] IF_BranchAddr;
     wire IF_freeze, IF_Branch_taken, IF_flush;
 
-    assign IF_freeze = 1'b0;
-    assign IF_Branch_taken = 1'b0;
-	assign IF_BranchAddr = 32'b0;
+    // assign IF_freeze = 1'b0;
+    // assign IF_Branch_taken = 1'b0;
+	// assign IF_BranchAddr = 32'b0;
 
 	IF_Stage if_stage(
-		.clk(clk), .rst(rst), .freeze(IF_freeze), .Branch_taken(BranchTaken),
+		.clk(clk), .rst(rst), .freeze(HazardOut), .Branch_taken(BranchTaken),
 		.BranchAddr(EXE_IF_branchAddress),
 		.PC(IF_IFR_PC), .Instruction(IF_IFR_Instruction)
 	);
 
 	IF_Stage_Reg if_stage_reg(
-		.clk(clk), .rst(rst), .freeze(IF_freeze), .flush(BranchTaken),
+		.clk(clk), .rst(rst), .freeze(HazardOut), .flush(BranchTaken), ////////freeze????
 		.PC_in(IF_IFR_PC), .Instruction_in(IF_IFR_Instruction),
 		.PC(IFR_ID_PC), .Instruction(IFR_ID_Instruction)
 	);
+
+    wire [3:0] EX_EXR_Dest;
+    
+    wire MEM_MEMR_MEM_R_EN و MEM_MEMR_WB_EN;
+
+    wire[3:0] MEM_MEMR_Dest;
+
+	wire[31:0] MEM_EX_ALU_Res و MEM_MEMR_MemoryData , MEM_MEMR_ALU;
 
 	ID_Stage instDecode(
 		.clk(clk),                             .rst(rst),                  
@@ -81,6 +89,14 @@ module CPU(input clk, rst,
 		.RnOut(ID_HZ_Rn),					   .Imm24Out(ID_IDR_Imm24),
 		.src1Out(ID_IDR_src1), 				   .src2Out(ID_IDR_src2),
 		.shiftOperandOut(ID_IDR_ShiftOperand)
+	);
+
+        HazardUnit hazardUnit(
+		.RnIn(ID_HZ_Rn),                        .reg2In(ID_HZ_RegSrc2), 
+		.TwoSrcIn(ID_HZ_TwoSrc),                .EXE_DestIn(EXE_EXER_Dest), 
+		.MEM_DestIn(MEM_MEMR_Dest),             .EXE_WB_ENIn(EXE_EXER_WB_EN), 
+		.MEM_WB_ENIn(MEM_MEMR_WB_EN),           .MEM_R_ENIn(IDR_EX_MEM_R_EN), 
+		.forwardENIn(1'b0),              .HazardOut(HazardOut)
 	);
 
 	ID_Stage_Reg instDecodeReg(
@@ -103,6 +119,24 @@ module CPU(input clk, rst,
 		.src2In(ID_IDR_src2),   		      .src2Out(IDR_EX_src2)
 	);
 
+	wire [31:0] 
+        EXER_MEM_ALU_Res, 
+        EXER_MEM_Val_Rm;
+
+    wire [3:0] 
+        EXE_MEM_Dest, 
+        EXE_MEM_status,
+         EXER_MEMR_Dest;
+
+    wire 
+        EXER_MEM_WB_EN, 
+        EXER_MEM_MEM_R_EN, 
+        EXER_MEM_MEM_W_EN, 
+        EXER_MEM_S;
+
+    wire[1:0]
+		selSrc1, selSrc2;
+
 	EXE_Stage exe_stage(
         .clk(clk), .rst(rst),
         .WB_ENIn(IDR_EX_WB_EN),           .MEM_R_ENIn(IDR_EX_MEM_R_EN),
@@ -116,52 +150,57 @@ module CPU(input clk, rst,
         .MEM_W_ENOut(EXE_EXER_MEM_W_EN),  .ALU_ResOut(EXE_EXER_ALU_Res),
         .Val_RmOut(EXE_EXER_Val_Rm),      .DestOut(EXE_EXER_Dest),
         .statusOut(EX_STAT),              .branchAddressOut(EXE_IF_branchAddress),
-        .SOut(EXE_STATUS_S),                .WB_ValueIn(),
-        .ALU_ResIn(),                     .selSrc1In(),
-        .selSrc2In()
+        .SOut(EXE_STATUS_S),              .WB_ValueIn(WB_ID_WB_Value),
+        .ALU_ResIn(EXER_MEM_ALU_Res),     .selSrc1In(selSrc1),
+        .selSrc2In(selSrc2)
     );
 
-	wire [31:0] 
-        EXER_MEM_ALU_Res, 
-        EXER_MEM_Val_Rm;
-
-    wire [3:0] 
-        EXE_MEM_Dest, 
-        EXE_MEM_status;
-
-    wire 
-        EXER_MEM_WB_EN, 
-        EXER_MEM_MEM_R_EN, 
-        EXER_MEM_MEM_W_EN, 
-        EXER_MEM_S;	
-
     EXE_Stage_Reg exe_stage_reg(
-        .clk(clk), .rst(rst), .en(SC_READY), .clr(1'b0),
-        .WB_ENIn(EXE_EXER_WB_EN), .WB_ENOut(EXER_MEM_WB_EN), 
-        .MEM_R_ENIn(EXE_EXER_MEM_R_EN), .MEM_R_ENOut(EXER_MEM_MEM_R_EN),
-        .MEM_W_ENIn(EXE_EXER_MEM_W_EN), .MEM_W_ENOut(EXER_MEM_MEM_W_EN), 
-        .ALU_ResIn(EXE_EXER_ALU_Res), .ALU_ResOut(EXER_MEM_ALU_Res),
-        .Val_RmIn(EXE_EXER_Val_Rm), .Val_RmOut(EXER_MEM_Val_Rm),
-        .DestIn(EXE_EXER_Dest), .DestOut(DestOut));
+        .clk(clk), .rst(rst),             .en(SC_READY), .clr(1'b0),
+        .WB_ENIn(EXE_EXER_WB_EN),           .WB_ENOut(EXER_MEM_WB_EN), 
+        .MEM_R_ENIn(EXE_EXER_MEM_R_EN),     .MEM_R_ENOut(EXER_MEM_MEM_R_EN),
+        .MEM_W_ENIn(EXE_EXER_MEM_W_EN),     .MEM_W_ENOut(EXER_MEM_MEM_W_EN), 
+        .ALU_ResIn(EXE_EXER_ALU_Res),     .ALU_ResOut(EXER_MEM_ALU_Res),
+        .Val_RmIn(IDR_EX_Val_Rm),         .Val_RmOut(EXER_MEM_Val_Rm),
+        .DestIn(IDR_EX_Dest),             .DestOut(EXER_MEMR_Dest));
 
-	wire [31:0] MEM_PC;	
-	MEM_Stage mem_stage(
-		// .clk(clk), .rst(rst),
-		.PC_in(EXE_PC_reg_out), .PC(MEM_PC)
+
+    StatusRegister statusRegister(
+		.clk(clk), .rst(rst), .en(EXE_STATUS_S), .statIn(EX_STAT), .statOut(STAT_Out)
 	);
 
+    ///////////////////////////////////////////
 
-
-	wire [31:0] MEM_PC_reg_o, WB_PC;
-	MEM_Stage_Reg mem_stage_reg(
-		.clk(clk), .rst(rst),
-		.PC_in(MEM_PC),
-		.PC(MEM_PC_reg_o)
+	MEM_Stage memory(
+		.clk(clk), .rst(rst),            .ALU_ResIn(EXER_MEM_ALU_Res),             
+		.MEM_W_ENIn(EXER_MEM_MEM_W_EN),   .MEM_R_ENIn(EXER_MEM_MEM_R_EN),       
+		.WB_ENIn(EXER_MEM_WB_EN),         .Value_RmIn(EXER_MEM_Val_Rm),         
+		.DestIn(EXER_MEMR_Dest),           .WB_ENOut(MEM_MEMR_WB_EN),           
+		.MEM_R_ENOut(MEM_MEMR_MEM_R_EN), .DataMemoryOut(MEM_MEMR_MemoryData), 
+		.DestOut(MEM_MEMR_Dest),         .ALU_ResOut(MEM_MEMR_ALU),
+		.MEM_EX_ALU_ResOut(MEM_EX_ALU_Res)
 	);
 
-	WB_Stage wb_stage(
-		// .clk(clk), .rst(rst),
-		.PC_in(MEM_PC_reg_o), .PC(WB_PC)
+    wire[31:0] MEMR_WB_MemoryData , MEMR_WB_ALU;
+    wire[3:0] MEMR_WB_Dest;
+    wire MEMR_WB_MEM_R_EN , MEMR_WB_WB_EN;
+
+	MEM_Stage_Reg memoryReg(
+		.clk(clk), .rst(rst),                   .clr(1'b0), .en(SC_READY), 
+		.WB_ENIn(EXER_MEM_WB_EN),               .WB_ENOut(MEMR_WB_WB_EN), 
+		.MEM_R_ENIn(EXER_MEM_MEM_R_EN),         .MEM_R_ENOut(MEMR_WB_MEM_R_EN), 
+		.ALU_ResIn(EXER_MEM_ALU_Res),           .ALU_ResOut(MEMR_WB_ALU), 
+		.DataMemoryIn(MEM_MEMR_MemoryData),     .DataMemoryOut(MEMR_WB_MemoryData), 
+		.DestIn(EXER_MEMR_Dest),                .DestOut(MEMR_WB_Dest)
+	);
+    //////////////////////////////////////////
+
+	WB_Stage writeBack(
+		.clk(clk),                     .rst(rst),           
+		.ALU_ResIn(MEMR_WB_ALU),       .DataMemoryIn(MEMR_WB_MemoryData), 
+		.MEM_R_ENIn(MEMR_WB_MEM_R_EN), .WB_DestIn(MEMR_WB_Dest), 
+		.WB_DestOut(WB_ID_WB_Dest),    .WB_ENIn(MEMR_WB_WB_EN), 
+		.WB_ENOut(WB_ID_WB_EN),        .WB_ValueOut(WB_ID_WB_Value)
 	);
 
 	assign PC = WB_PC;
