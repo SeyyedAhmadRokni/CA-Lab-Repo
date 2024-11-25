@@ -11,6 +11,6 @@ module CPU_tb;
     initial begin
         rst = 1;
         #10 rst = 0; 
-        #10000 $stop;
+        #1000 $stop;
     end
 endmodule

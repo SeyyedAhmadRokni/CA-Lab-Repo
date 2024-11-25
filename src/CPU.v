@@ -45,7 +45,7 @@ module CPU(input clk, rst,
     // assign WB_ID_WB_Value = 31'b0;
     // assign WB_ID_WB_EN = 1'b0;
     // assign HazardOut = 1'b0;
-    // assign SC_READY = 1'b1;
+    assign SC_READY = 1'b1;
 
     wire [31:0] IF_BranchAddr;
     wire IF_freeze, IF_Branch_taken, IF_flush;
@@ -135,6 +135,8 @@ module CPU(input clk, rst,
 
     wire[1:0]
 		selSrc1, selSrc2;
+        assign selSrc1 = 1'b0;
+        assign selSrc2 = 1'b0;
 
 	EXE_Stage exe_stage(
         .clk(clk), .rst(rst),

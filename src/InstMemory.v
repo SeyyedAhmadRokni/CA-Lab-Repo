@@ -4,7 +4,7 @@ module InstMemory(input rst,
     reg [31:0] im [4095:0];
     always @(posedge rst)
     begin
-        $readmemb("inst_test1.txt", im);
+        $readmemb("exec_test.txt", im);
     end
 
     always @(adr)
