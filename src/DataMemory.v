@@ -6,7 +6,7 @@ module DataMemory(clk, rst, ALU_ResIn, Value_RmIn,
 
     output reg [31:0] resultOut;
 
-    localparam WordCount = 64;
+    localparam WordCount = 2048;
 
     reg [31:0] dataMem [0:WordCount - 1]; // 256B memory
 

@@ -48,9 +48,8 @@ module CPU(input clk, rst,
     assign SC_READY = 1'b1;
 
     wire [31:0] IF_BranchAddr;
-    wire IF_freeze, IF_Branch_taken, IF_flush;
+    wire IF_Branch_taken, IF_flush;
 
-    // assign IF_freeze = 1'b0;
     // assign IF_Branch_taken = 1'b0;
 	// assign IF_BranchAddr = 32'b0;
 

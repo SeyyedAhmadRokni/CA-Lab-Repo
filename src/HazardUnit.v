@@ -20,7 +20,7 @@ module HazardUnit(RnIn, reg2In, TwoSrcIn, EXE_DestIn, MEM_DestIn, EXE_WB_ENIn,
         
         else begin
             if (EXE_WB_ENIn) begin
-                if (RnIn == EXE_DestIn || (TwoSrcIn && reg2In == EXE_DestIn)) begin
+                if ((RnIn == EXE_DestIn ) || (TwoSrcIn && reg2In == EXE_DestIn)) begin
                     HazardOut = 1'b1;
                 end
             end

@@ -17,7 +17,9 @@ module RegisterFile(
             end
             regmem[0] = 32'b0;
         end
-        else
-            regmem [Dest_wb] = Input_WB;
+        else begin
+            if (writeBackEn)
+                regmem [Dest_wb] = Input_WB;
+        end
     end
 endmodule
