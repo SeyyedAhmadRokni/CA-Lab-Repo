@@ -22,12 +22,12 @@ module EXE_Stage(clk, rst, WB_ENIn, MEM_R_ENIn, MEM_W_ENIn, EXE_CMDIn,
 
     Multiplexer4Input mux1(
         .a(Val_RnIn), .b(ALU_ResIn), .c(WB_ValueIn), 
-        .d(32'bz), .s(selSrc1In), .out(val1)
+        .d(32'b0), .s(selSrc1In), .out(val1)
     );
 
     Multiplexer4Input mux2(
         .a(Val_RmIn), .b(ALU_ResIn), .c(WB_ValueIn), 
-        .d(32'bz), .s(selSrc2In), .out(val2GeneratorIn)
+        .d(32'b0), .s(selSrc2In), .out(val2GeneratorIn)
     );
 
     Val2Generate val2Generator(

@@ -14,7 +14,7 @@ module Val2Generate(valRmIn, shiftOperandIn, IIn, STypeSignal, valOut);
 
     integer i;
 
-    always @(valRmIn, shiftOperandIn, IIn, STypeSignal) begin
+    always @(valRmIn, shiftOperandIn, IIn, STypeSignal , shift_imm) begin
         valOut = 32'b0;
         if (STypeSignal) begin  //LDR SDR
             valOut = {{20{shiftOperandIn[11]}}, shiftOperandIn};
