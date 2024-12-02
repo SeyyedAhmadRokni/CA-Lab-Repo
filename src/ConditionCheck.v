@@ -24,7 +24,7 @@ module ConditionCheck(condIn, condOut, statusIn);
             4'b1100: condOut = ~z & (n == v); // GT
             4'b1101: condOut = z | (n != v);  // LE
             4'b1110: condOut = 1'b1;          // AL
-            default: condOut = 1'bx;
+            default: condOut = 1'bz;
         endcase
     end
 endmodule

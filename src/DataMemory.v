@@ -16,7 +16,7 @@ module DataMemory(clk, rst, ALU_ResIn, Value_RmIn,
 
     integer i;
 
-    always @(negedge clk or posedge rst) begin
+    always @(posedge clk or posedge rst) begin
         if (rst)
             for (i = 0; i < WordCount; i = i + 1) begin
                 dataMem[i] <= 32'd0;
@@ -26,6 +26,7 @@ module DataMemory(clk, rst, ALU_ResIn, Value_RmIn,
     end
 
     always @(MEM_R_ENIn or adr) begin
+        resultOut = 32'bz;
         if (MEM_R_ENIn)
             resultOut = dataMem[adr];
     end
