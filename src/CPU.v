@@ -1,4 +1,4 @@
-module CPU(input clk, rst,
+module CPU(input clk, rst, forwardENIn,
 			output [31:0] PC);
 
 	wire [31:0] 
@@ -94,7 +94,7 @@ module CPU(input clk, rst,
 		.TwoSrcIn(ID_HZ_TwoSrc),                .EXE_DestIn(EXE_EXER_Dest), 
 		.MEM_DestIn(MEM_MEMR_Dest),             .EXE_WB_ENIn(EXE_EXER_WB_EN), 
 		.MEM_WB_ENIn(MEM_MEMR_WB_EN),           .MEM_R_ENIn(IDR_EX_MEM_R_EN), 
-		.forwardENIn(1'b0),              .HazardOut(HazardOut)
+		.forwardENIn(forwardENIn),              .HazardOut(HazardOut)
 	);
 
 	ID_Stage_Reg instDecodeReg(
@@ -132,10 +132,7 @@ module CPU(input clk, rst,
         EXER_MEM_MEM_W_EN, 
         EXER_MEM_S;
 
-    wire[1:0]
-		selSrc1, selSrc2;
-        assign selSrc1 = 1'b0;
-        assign selSrc2 = 1'b0;
+    wire[1:0] selSrc1, selSrc2;
 
 	EXE_Stage exe_stage(
         .clk(clk), .rst(rst),
@@ -202,6 +199,11 @@ module CPU(input clk, rst,
 		.WB_DestOut(WB_ID_WB_Dest),    .WB_ENIn(MEMR_WB_WB_EN), 
 		.WB_ENOut(WB_ID_WB_EN),        .WB_ValueOut(WB_ID_WB_Value)
 	);
+
+    ForwardingUnit forwardingunit(.forwardEnIn(forwardEnIn), .src1In(IDR_EX_src1), .src2In(IDR_EX_src2), 
+            .MEM_MEMR_WB_ENIn(EXER_MEM_MEM_W_EN), .WB_ID_WB_ENIn(MEMR_WB_WB_EN), 
+            .MEM_MEMR_DestIn(EXER_MEM_MEM_W_EN), .WB_ID_WB_DestIn(MEMR_WB_Dest), 
+            .selSrc1Out(selSrc1), .selSrc2Out(selSrc2));
 
 	assign PC = WB_ID_WB_Value;
 
