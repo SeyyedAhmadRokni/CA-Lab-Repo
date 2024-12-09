@@ -1,7 +1,9 @@
 module CPU_tb;
     reg clk, rst;
     wire [31:0] PC;
-    CPU cpu (clk, rst, PC);
+    wire forwardEn;
+    assign forwardEn = 1'b1;
+    CPU cpu (clk, rst, forwardEn, PC);
 
     initial begin
         clk = 0;
@@ -11,6 +13,6 @@ module CPU_tb;
     initial begin
         rst = 1;
         #10 rst = 0; 
-        #1000 $stop;
+        #2000 $stop;
     end
 endmodule

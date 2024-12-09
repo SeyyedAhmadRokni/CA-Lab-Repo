@@ -200,9 +200,9 @@ module CPU(input clk, rst, forwardENIn,
 		.WB_ENOut(WB_ID_WB_EN),        .WB_ValueOut(WB_ID_WB_Value)
 	);
 
-    ForwardingUnit forwardingunit(.forwardEnIn(forwardEnIn), .src1In(IDR_EX_src1), .src2In(IDR_EX_src2), 
-            .MEM_MEMR_WB_ENIn(EXER_MEM_MEM_W_EN), .WB_ID_WB_ENIn(MEMR_WB_WB_EN), 
-            .MEM_MEMR_DestIn(EXER_MEM_MEM_W_EN), .WB_ID_WB_DestIn(MEMR_WB_Dest), 
+    ForwardingUnit forwardingunit(.forwardEnIn(forwardENIn), .src1In(IDR_EX_src1), .src2In(IDR_EX_src2), 
+            .MEM_MEMR_WB_ENIn(EXER_MEM_WB_EN), .WB_ID_WB_ENIn(MEMR_WB_WB_EN), 
+            .MEM_MEMR_DestIn(EXER_MEMR_Dest), .WB_ID_WB_DestIn(MEMR_WB_Dest), 
             .selSrc1Out(selSrc1), .selSrc2Out(selSrc2));
 
 	assign PC = WB_ID_WB_Value;

@@ -313,6 +313,6 @@ output [31:0]	 PC;
 	// 	nim_clock = nim_clock + 1; 
 	// end
 
-	CPU cpu(.clk(CLOCK_50), .rst(SW[0]), .forwardENIn(SW[1]) .PC(PC));
+	CPU cpu(.clk(CLOCK_50), .rst(SW[0]), .forwardENIn(SW[1]), .PC(PC));
 	
 endmodule
