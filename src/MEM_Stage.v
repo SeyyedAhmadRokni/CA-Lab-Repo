@@ -28,8 +28,8 @@ module MEM_Stage(clk, rst, ALU_ResIn, MEM_W_ENIn, MEM_R_ENIn, WB_ENIn,
     wire SRAM_WE_N, SRAM_UB_N, SRAM_LB_N, SRAM_CE_N, SRAM_OE_N;
 
     Sram_Controller sram_controller(
-        .clk(clk), .rst(rst), .wr_en(MEM_W_ENIn), .rd_en(MEM_R_ENIn),
-        .address(ALU_ResIn), .writeData(Value_RmIn), .readData(DataMemoryOut), .ready(ready),
+        .clk(clk), .rst(rst), .wr_en(sramWriteEn), .rd_en(sramReadEn),
+        .address(ALU_ResIn), .writeData(Value_RmIn), .readData(DataMemoryOut), .ready(sramReady),
         .SRAM_DQ(SRAM_DQ), .SRAM_ADDR(SRAM_ADDR),
         .SRAM_UB_N(SRAM_UB_N), .SRAM_LB_N(SRAM_LB_N), .SRAM_WE_N(SRAM_WE_N), .SRAM_CE_N(SRAM_CE_N), .SRAM_OE_N(SRAM_OE_N)
     );
