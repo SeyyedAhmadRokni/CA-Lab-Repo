@@ -5,7 +5,6 @@ module CPU(input clk, rst, forwardENIn,
         // IF, IFR, ID
         IF_IFR_PC, IFR_ID_PC, 
         IF_IFR_Instruction, IFR_ID_Instruction,
-        IFR_ID_MEM_W,
         // ID, IDR, EX
         ID_IDR_PC, IDR_EX_PC,  
         ID_IDR_Val_Rn, IDR_EX_Val_Rn, 
@@ -46,8 +45,8 @@ module CPU(input clk, rst, forwardENIn,
     // assign WB_ID_WB_EN = 1'b0;
     // assign HazardOut = 1'b0;
 
-    wire [31:0] IF_BranchAddr;
-    wire IF_Branch_taken, IF_flush;
+    // wire [31:0] IF_BranchAddr;
+    // wire IF_Branch_taken, IF_flush;
 
     // assign IF_Branch_taken = 1'b0;
 	// assign IF_BranchAddr = 32'b0;
@@ -64,7 +63,7 @@ module CPU(input clk, rst, forwardENIn,
 		.PC(IFR_ID_PC), .Instruction(IFR_ID_Instruction)
 	);
 
-    wire [3:0] EX_EXR_Dest;
+    // wire [3:0] EX_EXR_Dest;
     
     wire MEM_MEMR_MEM_R_EN;
     wire[3:0] MEM_MEMR_Dest;
@@ -121,15 +120,15 @@ module CPU(input clk, rst, forwardENIn,
         EXER_MEM_Val_Rm;
 
     wire [3:0] 
-        EXE_MEM_Dest, 
-        EXE_MEM_status,
-         EXER_MEMR_Dest;
+        // EXE_MEM_Dest, 
+        // EXE_MEM_status,
+        EXER_MEMR_Dest;
 
     wire 
         EXER_MEM_WB_EN, 
         EXER_MEM_MEM_R_EN, 
-        EXER_MEM_MEM_W_EN, 
-        EXER_MEM_S;
+        // EXER_MEM_S,
+        EXER_MEM_MEM_W_EN;
 
     wire[1:0] selSrc1, selSrc2;
 

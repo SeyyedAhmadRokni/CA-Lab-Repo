@@ -39,13 +39,15 @@ module Sram_Controller (
     always @(ps, wr_en, rd_en, address, writeData, SRAM_ADDR, SRAM_DQ_REG) begin
         {SRAM_UB_N, SRAM_LB_N, SRAM_WE_N, SRAM_CE_N, SRAM_OE_N} = 4'b1;
         ready = 1'b0;
-        SRAM_DQ_REG = 16'b0;
         case (ps)
             3'd0: begin
                 ready = ~(wr_en | rd_en);
+                readData = 32'b0;
+                SRAM_DQ_REG = 16'b0;
+                SRAM_ADDR = 18'b0;
             end
             3'd1: begin
-                SRAM_ADDR = address[18:1];
+                SRAM_ADDR = {address[18:2], 1'b0};
                 if (wr_en)begin
                     SRAM_WE_N = 1'b0;
                     SRAM_DQ_REG = writeData[15:0];
@@ -55,8 +57,9 @@ module Sram_Controller (
             3'd2: begin
                 SRAM_WE_N = 1'b0;
                 SRAM_ADDR = SRAM_ADDR + 1;
-                if (wr_en)
+                if (wr_en)begin
                     SRAM_DQ_REG = writeData[31:16];
+                end
                 else if (rd_en)
                     readData[15:0] = SRAM_DQ_REG;
 
