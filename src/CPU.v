@@ -52,7 +52,7 @@ module CPU(input clk, rst, forwardENIn,
 	// assign IF_BranchAddr = 32'b0;
 
 	IF_Stage if_stage(
-		.clk(clk), .rst(rst), .freeze(HazardOut), .Branch_taken(BranchTaken),
+		.clk(clk), .rst(rst), .freeze(HazardOut | ~MEM_SRAM_ready), .Branch_taken(BranchTaken),
 		.BranchAddr(EXE_IF_branchAddress),
 		.PC(IF_IFR_PC), .Instruction(IF_IFR_Instruction)
 	);
