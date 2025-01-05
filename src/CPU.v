@@ -38,14 +38,13 @@ module CPU(input clk, rst, forwardENIn,
         WB_ID_WB_EN, 
         ID_IDR_I, IDR_EX_I,
         HazardOut, ID_HZ_TwoSrc,
-        SC_READY; 
+        MEM_SRAM_ready;
 
     // assign STAT_Out = 4'b0;
     // assign WB_ID_WB_Dest = 4'b0;
     // assign WB_ID_WB_Value = 31'b0;
     // assign WB_ID_WB_EN = 1'b0;
     // assign HazardOut = 1'b0;
-    assign SC_READY = 1'b1;
 
     wire [31:0] IF_BranchAddr;
     wire IF_Branch_taken, IF_flush;
@@ -60,7 +59,7 @@ module CPU(input clk, rst, forwardENIn,
 	);
 
 	IF_Stage_Reg if_stage_reg(
-		.clk(clk), .rst(rst), .freeze(HazardOut), .flush(BranchTaken), ////////freeze????
+		.clk(clk), .rst(rst), .freeze(HazardOut | ~MEM_SRAM_ready), .flush(BranchTaken),
 		.PC_in(IF_IFR_PC), .Instruction_in(IF_IFR_Instruction),
 		.PC(IFR_ID_PC), .Instruction(IFR_ID_Instruction)
 	);
@@ -98,7 +97,7 @@ module CPU(input clk, rst, forwardENIn,
 	);
 
 	ID_Stage_Reg instDecodeReg(
-		.clk(clk), .rst(rst),                 .en(SC_READY), .clr(BranchTaken),
+		.clk(clk), .rst(rst),                 .en(MEM_SRAM_ready), .clr(BranchTaken),
 		.PCIn(ID_IDR_PC), 			          .PCOut(IDR_EX_PC),
 		.WB_ENIn(ID_IDR_WB_EN), 	          .WB_ENOut(IDR_EX_WB_EN), 
 		.MEM_R_ENIn(ID_IDR_MEM_R_EN),         .MEM_R_ENOut(IDR_EX_MEM_R_EN), 
@@ -153,7 +152,7 @@ module CPU(input clk, rst, forwardENIn,
     );
 
     EXE_Stage_Reg exe_stage_reg(
-        .clk(clk), .rst(rst),             .en(SC_READY), .clr(1'b0),
+        .clk(clk), .rst(rst),             .en(MEM_SRAM_ready), .clr(1'b0),
         .WB_ENIn(EXE_EXER_WB_EN),           .WB_ENOut(EXER_MEM_WB_EN), 
         .MEM_R_ENIn(EXE_EXER_MEM_R_EN),     .MEM_R_ENOut(EXER_MEM_MEM_R_EN),
         .MEM_W_ENIn(EXE_EXER_MEM_W_EN),     .MEM_W_ENOut(EXER_MEM_MEM_W_EN), 
@@ -175,7 +174,8 @@ module CPU(input clk, rst, forwardENIn,
 		.DestIn(EXER_MEMR_Dest),           .WB_ENOut(MEM_MEMR_WB_EN),           
 		.MEM_R_ENOut(MEM_MEMR_MEM_R_EN), .DataMemoryOut(MEM_MEMR_MemoryData), 
 		.DestOut(MEM_MEMR_Dest),         .ALU_ResOut(MEM_MEMR_ALU),
-		.MEM_EX_ALU_ResOut(MEM_EX_ALU_Res)
+		.MEM_EX_ALU_ResOut(MEM_EX_ALU_Res),
+        .ready(MEM_SRAM_ready)
 	);
 
     wire[31:0] MEMR_WB_MemoryData , MEMR_WB_ALU;
@@ -183,7 +183,7 @@ module CPU(input clk, rst, forwardENIn,
     wire MEMR_WB_MEM_R_EN , MEMR_WB_WB_EN;
 
 	MEM_Stage_Reg memoryReg(
-		.clk(clk), .rst(rst),                   .clr(1'b0), .en(SC_READY), 
+		.clk(clk), .rst(rst),                   .clr(1'b0), .en(MEM_SRAM_ready), 
 		.WB_ENIn(EXER_MEM_WB_EN),               .WB_ENOut(MEMR_WB_WB_EN), 
 		.MEM_R_ENIn(EXER_MEM_MEM_R_EN),         .MEM_R_ENOut(MEMR_WB_MEM_R_EN), 
 		.ALU_ResIn(EXER_MEM_ALU_Res),           .ALU_ResOut(MEMR_WB_ALU), 

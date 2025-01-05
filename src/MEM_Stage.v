@@ -1,18 +1,20 @@
 module MEM_Stage(clk, rst, ALU_ResIn, MEM_W_ENIn, MEM_R_ENIn, WB_ENIn, 
                  Value_RmIn, DestIn, WB_ENOut, MEM_R_ENOut,
-                 DataMemoryOut, DestOut, ALU_ResOut, MEM_EX_ALU_ResOut);
+                 DataMemoryOut, DestOut, ALU_ResOut, MEM_EX_ALU_ResOut,
+                 ready);
 
     parameter N = 32;
-    input wire[0:0] clk, rst;
+    input clk, rst;
     
-    input wire[0:0] MEM_R_ENIn, MEM_W_ENIn, WB_ENIn;
-    input wire[3:0] DestIn;
-    input wire[N - 1:0] ALU_ResIn, Value_RmIn;
+    input MEM_R_ENIn, MEM_W_ENIn, WB_ENIn;
+    input [3:0] DestIn;
+    input [N - 1:0] ALU_ResIn, Value_RmIn;
 
 
-    output wire[0:0] MEM_R_ENOut, WB_ENOut;
-    output wire[3:0] DestOut;
-    output wire[N - 1:0] DataMemoryOut, ALU_ResOut, MEM_EX_ALU_ResOut;
+    output MEM_R_ENOut, WB_ENOut;
+    output [3:0] DestOut;
+    output [N - 1:0] DataMemoryOut, ALU_ResOut, MEM_EX_ALU_ResOut;
+    output ready;
 
 
     // DataMemory DM(
@@ -21,10 +23,9 @@ module MEM_Stage(clk, rst, ALU_ResIn, MEM_W_ENIn, MEM_R_ENIn, WB_ENIn,
     //     .MEM_R_ENIn(MEM_R_ENIn), .resultOut(DataMemoryOut)
     // );
     
-    output ready;
     wire [15:0] SRAM_DQ;
     wire [17:0] SRAM_ADDR;
-    output SRAM_UB_N, SRAM_LB_N, SRAM_WE_N, SRAM_CE_N, SRAM_OE_N;
+    wire SRAM_WE_N, SRAM_UB_N, SRAM_LB_N, SRAM_CE_N, SRAM_OE_N;
 
     Sram_Controller sram_controller(
         .clk(clk), .rst(rst), .wr_en(MEM_W_ENIn), .rd_en(MEM_R_ENIn),
@@ -33,9 +34,11 @@ module MEM_Stage(clk, rst, ALU_ResIn, MEM_W_ENIn, MEM_R_ENIn, WB_ENIn,
         .SRAM_UB_N(SRAM_UB_N), .SRAM_LB_N(SRAM_LB_N), .SRAM_WE_N(SRAM_WE_N), .SRAM_CE_N(SRAM_CE_N), .SRAM_OE_N(SRAM_OE_N)
     );
 
+    // assign DataMemoryOut = MEM_R_ENIn ? readData : 32'b0;
+
     SRAM sram(
-        .clk(clk), .rst(rst), .SRAM_WE_NIn(SRAM_ADDR), .SRAM_ADDRIn(ALU_ResIn), .SRAM_DQInOut(SRAM_DQ)
-    )
+        .clk(clk), .rst(rst), .SRAM_WE_NIn(SRAM_WE_N), .SRAM_ADDRIn(SRAM_ADDR), .SRAM_DQInOut(SRAM_DQ)
+    );
 
     assign MEM_R_ENOut = MEM_R_ENIn;
     assign WB_ENOut = WB_ENIn;
