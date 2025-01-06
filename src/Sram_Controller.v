@@ -19,6 +19,14 @@ module Sram_Controller (
 
     assign SRAM_DQ = wr_en ? SRAM_DQ_REG : 16'bz;
 
+    assign memAddr = address - 32'd1024;
+    wire [17:0] sramLowAddr, sramHighAddr;
+    assign sramLowAddr = {memAddr[18:2], 1'b0};
+    assign sramHighAddr = sramLowAddr + 18'd1;
+    // wire [17:0] sramLowAddrWrite, sramHighAddrWrite;
+    // assign sramLowAddrWrite = {memAddr[18:2], 1'b0};
+    // assign sramHighAddrWrite = sramLowAddrWrite + 18'd1;
+
     always @(posedge clk, rst)begin
         if (rst)
             ps <= 3'd0;
@@ -49,7 +57,8 @@ module Sram_Controller (
                 SRAM_ADDR = 18'b0;
             end
             3'd1: begin
-                SRAM_ADDR = address[18:1]; //??
+                // SRAM_ADDR = address[18:1]; //??
+                SRAM_ADDR = sramLowAddr;
                 if (wr_en)begin
                     SRAM_WE_N = 1'b0;
                     SRAM_DQ_REG = writeData[15:0];
@@ -57,7 +66,7 @@ module Sram_Controller (
 
             end
             3'd2: begin
-                SRAM_ADDR = SRAM_ADDR + 1;
+                SRAM_ADDR = sramHighAddr;
                 if (wr_en)begin
                     SRAM_WE_N = 1'b0;
                     SRAM_DQ_REG = writeData[31:16];
