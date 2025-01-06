@@ -67,7 +67,7 @@ module Sram_Controller (
 
             end
             3'd2: begin
-                SRAM_ADDR = sramHighAddr;
+                SRAM_ADDR = sramLowAddr;
                 if (wr_en)begin
                     SRAM_WE_N = 1'b0;
                     SRAM_DQ_REG = writeData[31:16];
@@ -77,13 +77,15 @@ module Sram_Controller (
 
             end
             3'd3: begin
-                if (rd_en)begin
-                    readData[31:16] = SRAM_DQ;
-                end
+                SRAM_ADDR = sramHighAddr;
 
 
             end
             3'd4: begin
+                SRAM_ADDR = sramHighAddr;
+                if (rd_en)begin
+                    readData[31:16] = SRAM_DQ;
+                end
 
             end
             3'd5: begin

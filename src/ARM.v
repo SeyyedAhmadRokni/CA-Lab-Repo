@@ -318,6 +318,11 @@ output [31:0]	 PC;
 	assign SRAM_CE_N = 1'b1;						
 	assign SRAM_OE_N = 1'b1;	
 
+	// reg [1:0] clk = 0;
+	// always @(posedge CLOCK_50) begin
+	// 	clk = clk + 1;
+	// end
+
 	CPU cpu(.clk(CLOCK_50), .rst(SW[0]), .forwardENIn(SW[1]), .PC(PC), .SRAM_DQ(SRAM_DQ),
 	.SRAM_ADDR(SRAM_ADDR), .SRAM_WE_N(SRAM_WE_N));
 
