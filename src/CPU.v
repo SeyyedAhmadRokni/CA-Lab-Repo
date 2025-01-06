@@ -1,5 +1,5 @@
 module CPU(input clk, rst, forwardENIn,
-			output [31:0] PC);
+		output [31:0] PC, inout [15:0] SRAM_DQ, output SRAM_WE_N, output[17:0] SRAM_ADDR);
 
 	wire [31:0] 
         // IF, IFR, ID
@@ -174,7 +174,8 @@ module CPU(input clk, rst, forwardENIn,
 		.MEM_R_ENOut(MEM_MEMR_MEM_R_EN), .DataMemoryOut(MEM_MEMR_MemoryData), 
 		.DestOut(MEM_MEMR_Dest),         .ALU_ResOut(MEM_MEMR_ALU),
 		.MEM_EX_ALU_ResOut(MEM_EX_ALU_Res),
-        .ready(MEM_SRAM_ready)
+        .ready(MEM_SRAM_ready), .SRAM_DQ(SRAM_DQ),
+        .SRAM_ADDR(SRAM_ADDR),                  .SRAM_WE_N(SRAM_WE_N)
 	);
 
     wire[31:0] MEMR_WB_MemoryData , MEMR_WB_ALU;
@@ -187,7 +188,7 @@ module CPU(input clk, rst, forwardENIn,
 		.MEM_R_ENIn(EXER_MEM_MEM_R_EN),         .MEM_R_ENOut(MEMR_WB_MEM_R_EN), 
 		.ALU_ResIn(EXER_MEM_ALU_Res),           .ALU_ResOut(MEMR_WB_ALU), 
 		.DataMemoryIn(MEM_MEMR_MemoryData),     .DataMemoryOut(MEMR_WB_MemoryData), 
-		.DestIn(EXER_MEMR_Dest),                .DestOut(MEMR_WB_Dest)
+		.DestIn(EXER_MEMR_Dest),                .DestOut(MEMR_WB_Dest),
 	);
     //////////////////////////////////////////
 

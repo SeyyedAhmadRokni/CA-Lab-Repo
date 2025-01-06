@@ -313,6 +313,13 @@ output [31:0]	 PC;
 	// 	nim_clock = nim_clock + 1; 
 	// end
 
-	CPU cpu(.clk(CLOCK_50), .rst(SW[0]), .forwardENIn(SW[1]), .PC(PC));
+	assign SRAM_UB_N = 1'b1;						
+	assign SRAM_LB_N = 1'b1;					 						
+	assign SRAM_CE_N = 1'b1;						
+	assign SRAM_OE_N = 1'b1;	
+
+	CPU cpu(.clk(CLOCK_50), .rst(SW[0]), .forwardENIn(SW[1]), .PC(PC), .SRAM_DQ(SRAM_DQ),
+	.SRAM_ADDR(SRAM_ADDR), .SRAM_WE_N(SRAM_WE_N));
+
 	
 endmodule

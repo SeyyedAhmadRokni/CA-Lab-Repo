@@ -28,7 +28,7 @@ module Sram_Controller (
     // assign sramLowAddrWrite = {memAddr[18:2], 1'b0};
     // assign sramHighAddrWrite = sramLowAddrWrite + 18'd1;
 
-    always @(posedge clk, rst)begin
+    always @(posedge clk, posedge rst)begin
         if (rst)
             ps <= 3'd0;
         else
