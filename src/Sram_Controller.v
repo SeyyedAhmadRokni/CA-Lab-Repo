@@ -19,6 +19,7 @@ module Sram_Controller (
 
     assign SRAM_DQ = wr_en ? SRAM_DQ_REG : 16'bz;
 
+    wire [31:0] memAddr;    
     assign memAddr = address - 32'd1024;
     wire [17:0] sramLowAddr, sramHighAddr;
     assign sramLowAddr = {memAddr[18:2], 1'b0};
